@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kimbap! | Destress Tool</title>
+  <link rel="apple-touch-icon" sizes="128x128" href="icon.png">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: white;
+      background-image: url();
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+    }
+    #pet {
+      font-size: 5rem;
+      transition: transform 0.5s ease-in-out;
+    }
+    #status {
+      margin: 1rem 0;
+      font-weight: bold;
+      height: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    #controls button {
+      color: #fff;
+     background-color: #6abc3a;
+     padding: 15px 40px 15px 40px;
+     margin: 10px;
+      font-size: 14px;
+  font-family: "Press Start 2P", system-ui;
+     border: 0;
+     box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, 0px 10px #00000038, 5px 5px #00000038, -5px 5px #00000038, inset 0px 5px #ffffff36 ;
+     cursor: pointer;
+    }
+    #controls button:hover {
+      background-color: #0056b3;
+    }
+    #controls button:active {
+      transform: translateY(5px);
+      box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black,inset 0px 5px #00000038;
+    }
+  
+    .progress-container {
+      margin-top: 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+    }
+    .progress-bar-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .progress-bar-vertical {
+      width: 20px;
+      height: 150px;
+      background-color: #ccc;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 0.5rem;
+    }
+    .progress-vertical {
+      width: 100%;
+      height: 0%;
+      position: absolute;
+      bottom: 0;
+      transition: height 0.3s;
+    }
+    /* Updated IDs to match HTML */
+    #alertness-bar {
+      background-color: #76c7c0; /* Teal color for alertness */
+    }
+    #satiety-bar {
+      background-color: #ffa500; /* Orange color for satiety */
+    }
+    #happiness-bar {
+      background-color: #ff69b4; /* Pink color for happiness */
+    }
+    .progress-label {
+      text-align: center;
+      font-weight: bold;
+    }
+    .progress-score {
+      margin-top: 0.5rem;
+      font-weight: bold;
+    }
+    .emoji-animation {
+      font-size: 3rem;
+      position: absolute;
+      animation: floatUp 1s ease-in-out;
+      opacity: 0;
+    }
+    @keyframes floatUp {
+      0% {
+        transform: translateY(20px);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+    }
+
+    /* Media Queries for Mobile Responsiveness */
+    @media (max-width: 768px) {
+      #pet {
+        font-size: 4rem;
+      }
+      #controls button {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+      }
+      .progress-bar-vertical {
+        height: 100px;
+      }
+    }
+
+    @media (max-width: 470px) {
+      .progress-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: nowrap;
+        gap: 1rem;
+      }
+      .progress-bar-vertical {
+        height: 80px;
+      }
+    }
+      .progress-bar-vertical {
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Kimbap!</h1>
+  <h3>The De-Stress Tool.</h3>
+  <div id="pet"><img src="download.gif" width="200"></div> <!-- Dog Emoji -->
+  <div id="status">Your pet is happy!</div>
+  <div id="controls">
+    <button onclick="feedPet()" style="background-color: #38667f;">Feed</button>
+    <button onclick="playWithPet()" style="background-color: #9f7db1;">Play</button>
+    <button onclick="putPetToSleep()" style="background-color: #009688;">Sleep</button>
+  </div>
+  <div class="progress-container">
+    <div class="progress-bar-container">
+      <div class="progress-bar-vertical">
+        <div id="satiety-bar" class="progress-vertical"></div>
+      </div>
+      <div class="progress-label">Satiety</div>
+      <div class="progress-score" id="satiety-score">Satiety: 5/10</div>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar-vertical">
+        <div id="happiness-bar" class="progress-vertical"></div>
+      </div>
+      <div class="progress-label">Happiness</div>
+      <div class="progress-score" id="happiness-score">Happiness: 5/10</div>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar-vertical">
+        <div id="alertness-bar" class="progress-vertical"></div>
+      </div>
+      <div class="progress-label">Alertness</div>
+      <div class="progress-score" id="alertness-score">Alertness: 5/10</div>
+    </div>
+  </div>
+
+  <script>
+    let happiness = 5;
+    let alertness = 5;
+    let satiety = 5;
+
+    function updatePet() {
+      const pet = document.getElementById("pet");
+      const status = document.getElementById("status");
+      const happinessBar = document.getElementById("happiness-bar");
+      const alertnessBar = document.getElementById("alertness-bar");
+      const satietyBar = document.getElementById("satiety-bar");
+      const happinessScore = document.getElementById("happiness-score");
+      const alertnessScore = document.getElementById("alertness-score");
+      const satietyScore = document.getElementById("satiety-score");
+      
+      happinessBar.style.height = happiness * 10 + "%";
+      alertnessBar.style.height = alertness * 10 + "%";
+      satietyBar.style.height = satiety * 10 + "%";
+      happinessScore.textContent = `Happiness: ${happiness}/10`;
+      alertnessScore.textContent = `Alertness: ${alertness}/10`;
+      satietyScore.textContent = `Satiety: ${satiety}/10`;
+
+      updatePetExpression();
+    }
+
+    function updatePetExpression() {
+      const pet = document.getElementById("pet");
+      const status = document.getElementById("status");
+
+      // Determine pet expression and status message based on alertness, satiety, and happiness
+      if (satiety < 3) {
+        pet.style.transform = "scale(0.8) rotate(-10deg)"; // Smaller and tilted to show sadness
+        status.textContent = "I'm so hungry... please feed me!";
+      } else if (satiety <= 5) {
+        pet.style.transform = "scale(0.9)"; // Slightly smaller
+        status.textContent = "I'm a bit hungry... could you give me something to eat?";
+      } else if (alertness < 3) {
+        pet.style.transform = "scale(0.8) rotate(10deg)"; // Smaller and tilted to show tiredness
+        status.textContent = "I'm so sleepy... I need some rest.";
+      } else if (alertness <= 5) {
+        pet.style.transform = "scale(0.9)"; // Slightly smaller to indicate being a bit tired
+        status.textContent = "I'm feeling a little drowsy...";
+      } else if (happiness >= 8) {
+        pet.style.transform = "scale(1.2)"; // Larger to show excitement
+        status.textContent = "I'm so happy! You're the best!";
+      } else if (happiness >= 5) {
+        pet.style.transform = "scale(1)"; // Normal size
+        status.textContent = "I'm happy! Let's keep having fun!";
+      } else {
+        pet.style.transform = "scale(0.8) rotate(-5deg)"; // Smaller and slightly tilted to show sadness
+        status.textContent = "I'm feeling sad... could you cheer me up?";
+      }
+    }
+
+    function animateEmoji(emoji) {
+      const emojiElement = document.createElement("div");
+      emojiElement.classList.add("emoji-animation");
+      emojiElement.textContent = emoji;
+      document.body.appendChild(emojiElement);
+
+      // Position the emoji over the pet
+      const pet = document.getElementById("pet");
+      const petRect = pet.getBoundingClientRect();
+      emojiElement.style.left = `${petRect.left + petRect.width / 2 - 15}px`;
+      emojiElement.style.top = `${petRect.top - 30}px`;
+
+      // Remove the emoji after animation
+      setTimeout(() => {
+        emojiElement.remove();
+      }, 1000);
+    }
+
+    function feedPet() {
+      if (alertness > 2) {
+        happiness = Math.min(happiness + 1, 10); // Happiness goes up a little
+        alertness = Math.max(alertness - 1, 0); // Alertness decreases a little (gets slightly sleepy)
+        satiety = Math.min(satiety + 3, 10); // Satiety increases a lot
+        animateEmoji("🍖"); // Meat emoji for feeding
+        updatePet();
+      } else {
+        document.getElementById("status").textContent = "Your pet is too sleepy to eat! Put it to sleep first.";
+      }
+    }
+
+    function playWithPet() {
+      if (alertness > 2 && satiety > 2) {
+        happiness = Math.min(happiness + 3, 10); // Happiness goes up a lot
+        alertness = Math.max(alertness - 2, 0); // Alertness decreases (playing makes the pet tired)
+        satiety = Math.max(satiety - 2, 0); // Satiety decreases
+        animateEmoji("⚽"); // Soccer ball emoji for playing
+        updatePet();
+      } else if (alertness <= 2) {
+        document.getElementById("status").textContent = "Your pet is too sleepy to play! Put it to sleep first.";
+      } else if (satiety <= 2) {
+        document.getElementById("status").textContent = "Your pet is too hungry to play! Feed it first.";
+      }
+    }
+
+    function putPetToSleep() {
+      happiness = Math.max(happiness - 1, 0); // Happiness decreases slightly
+      alertness = Math.min(alertness + 5, 10); // Alertness increases significantly (pet rests and becomes alert)
+      satiety = Math.max(satiety - 2, 0); // Satiety decreases
+      animateEmoji("💤"); // Sleep emoji for sleeping
+      updatePet();
+    }
+
+    setInterval(() => {
+      happiness = Math.max(happiness - 1, 0); // Decrease happiness over time
+      alertness = Math.max(alertness - 1, 0); // Decrease alertness over time (pet gets sleepy)
+      satiety = Math.max(satiety - 1, 0); // Decrease satiety over time
+      updatePet();
+    }, 5000); // Update every 5 seconds
+
+    // Initialize the pet's status when the page loads
+    updatePet();
+  </script>
+</body>
+</html>
