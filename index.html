@@ -6,6 +6,8 @@
   <title>Kimbap! | Destress Tool</title>
   <link rel="apple-touch-icon" sizes="128x128" href="icon.png">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -215,7 +217,7 @@
       // Determine pet expression and status message based on alertness, satiety, and happiness
       if (satiety < 3) {
         pet.style.transform = "scale(0.8) rotate(-10deg)"; // Smaller and tilted to show sadness
-        status.textContent = "I'm so hungry... please feed me!";
+        status.textContent = "Aiya! I'm so hungry... please feed me!";
       } else if (satiety <= 5) {
         pet.style.transform = "scale(0.9)"; // Slightly smaller
         status.textContent = "I'm a bit hungry... could you give me something to eat?";
@@ -263,7 +265,7 @@
         animateEmoji("🍖"); // Meat emoji for feeding
         updatePet();
       } else {
-        document.getElementById("status").textContent = "Your pet is too sleepy to eat! Put it to sleep first.";
+        document.getElementById("status").textContent = "She is too sleepy to eat! Put her to sleep first.";
       }
     }
 
@@ -275,9 +277,9 @@
         animateEmoji("⚽"); // Soccer ball emoji for playing
         updatePet();
       } else if (alertness <= 2) {
-        document.getElementById("status").textContent = "Your pet is too sleepy to play! Put it to sleep first.";
+        document.getElementById("status").textContent = "She is too sleepy to play! Put her to sleep first.";
       } else if (satiety <= 2) {
-        document.getElementById("status").textContent = "Your pet is too hungry to play! Feed it first.";
+        document.getElementById("status").textContent = "She is too hungry to play! Feed her first.";
       }
     }
 
