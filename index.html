@@ -14,7 +14,8 @@
 </head>
 <body>
   <h1>Kimbap!</h1>
-  <h3>Travel Mode 🇸🇬🇻🇳🇳🇿</h3>
+  <p id="combined-time">Loading times...</p>
+  <h3>Safe Travels Hun! 🇸🇬🇻🇳🇳🇿</h3>
   <div id="pet"><img id="pet-image" src="avatar.gif" width="200"></div> <div id="status">Your pet is happy!</div>
   <div id="controls">
     <button onclick="feedPet()" style="background-color: #38667f;">Feed</button>
@@ -50,10 +51,63 @@
     let alertness = 5;
     let satiety = 5;
 
-    // --- NEW CONSTANTS ---
+    // EDITED: Time constants
     const ORIGINAL_IMAGE = "avatar.gif";
-    const ROTATED_IMAGE = "avatar2.gif"; // **Make sure you have this image file!**
-    // ---------------------
+    const ROTATED_IMAGE = "avatar2.gif"; // Changed from rotated_avatar.gif
+
+    // NEW: Helper function to check if the hour is considered "daytime" (6 AM to 6 PM)
+    function isDaytime(time) {
+        const hour = time.getHours();
+        return hour >= 6 && hour < 18; // 6:00 to 17:59 is day
+    }
+
+    function getTimeByZone(timeZone) {
+        const now = new Date();
+        
+        // Use Intl.DateTimeFormat to get the hour for the specific time zone
+        const hourString = new Intl.DateTimeFormat('en-US', { 
+            hour: '2-digit', 
+            hour12: false, 
+            timeZone: timeZone 
+        }).format(now);
+        
+        // Return a Date object representing the time in that zone for easy hour checking
+        const remoteTime = new Date(now.toLocaleString("en-US", { timeZone: timeZone }));
+        
+        return remoteTime;
+    }
+
+    function updateTime() {
+        const now = new Date();
+        const combinedTimeElement = document.getElementById("combined-time");
+        
+        // Options for time formatting (no seconds)
+        const timeOptions = {
+            hour: '2-digit',
+            minute: '2-digit'
+        };
+
+        // --- 1. User's Local Time (K) ---
+        const userDate = now; // Local time is always the raw Date object
+        const userTime = userDate.toLocaleTimeString('en-US', timeOptions);
+        const isUserDay = isDaytime(userDate);
+        const userEmoji = isUserDay ? '☀️' : '🌙';
+        const userClass = isUserDay ? 'day' : 'night';
+        
+        // --- 2. London Time (H) ---
+        const londonDate = getTimeByZone('Europe/London');
+        const londonTime = londonDate.toLocaleTimeString('en-US', timeOptions);
+        const isLondonDay = isDaytime(londonDate);
+        const londonEmoji = isLondonDay ? '☀️' : '🌙';
+        const londonClass = isLondonDay ? 'day' : 'night';
+
+        // Construct HTML with new labels, classes, and emojis
+        const userHtml = `<span class="time-pill ${userClass}">${userEmoji} K: ${userTime}</span>`;
+        const londonHtml = `<span class="time-pill ${londonClass}">${londonEmoji} H: ${londonTime}</span>`;
+
+        // Combine and display
+        combinedTimeElement.innerHTML = userHtml + londonHtml;
+    }
 
     function updatePet() {
       const pet = document.getElementById("pet");
@@ -73,13 +127,14 @@
       satietyScore.textContent = `Satiety: ${satiety}/10`;
 
       updatePetExpression();
+      updateTime(); 
     }
 
     function updatePetExpression() {
       const pet = document.getElementById("pet");
-      const petImage = document.getElementById("pet-image"); // EDITED: Get the image element
+      const petImage = document.getElementById("pet-image");
       const status = document.getElementById("status");
-      let isRotated = false; // Flag to track if rotation is applied
+      let isRotated = false;
 
       // Determine pet expression and status message based on alertness, satiety, and happiness
       if (satiety < 3) {
@@ -108,13 +163,12 @@
         isRotated = true;
       }
 
-      // --- EDITED: Logic to swap the image based on rotation ---
+      // Logic to swap the image based on rotation
       if (isRotated) {
         petImage.src = ROTATED_IMAGE;
       } else {
         petImage.src = ORIGINAL_IMAGE;
       }
-      // -----------------------------------------------------------
     }
 
     function animateEmoji(emoji) {
@@ -137,10 +191,10 @@
 
     function feedPet() {
       if (alertness > 2) {
-        happiness = Math.min(happiness + 1, 10); // Happiness goes up a little
-        alertness = Math.max(alertness - 1, 0); // Alertness decreases a little (gets slightly sleepy)
-        satiety = Math.min(satiety + 3, 10); // Satiety increases a lot
-        animateEmoji("🍖"); // Meat emoji for feeding
+        happiness = Math.min(happiness + 1, 10);
+        alertness = Math.max(alertness - 1, 0);
+        satiety = Math.min(satiety + 3, 10);
+        animateEmoji("🍖");
         updatePet();
       } else {
         document.getElementById("status").textContent = "She is too sleepy to eat! Put her to sleep first.";
@@ -149,10 +203,10 @@
 
     function playWithPet() {
       if (alertness > 2 && satiety > 2) {
-        happiness = Math.min(happiness + 3, 10); // Happiness goes up a lot
-        alertness = Math.max(alertness - 2, 0); // Alertness decreases (playing makes the pet tired)
-        satiety = Math.max(satiety - 2, 0); // Satiety decreases
-        animateEmoji("⚽"); // Soccer ball emoji for playing
+        happiness = Math.min(happiness + 3, 10);
+        alertness = Math.max(alertness - 2, 0);
+        satiety = Math.max(satiety - 2, 0);
+        animateEmoji("⚽");
         updatePet();
       } else if (alertness <= 2) {
         document.getElementById("status").textContent = "She is too sleepy to play! Put her to sleep first.";
@@ -162,21 +216,24 @@
     }
 
     function putPetToSleep() {
-      happiness = Math.max(happiness - 1, 0); // Happiness decreases slightly
-      alertness = Math.min(alertness + 5, 10); // Alertness increases significantly (pet rests and becomes alert)
-      satiety = Math.max(satiety - 2, 0); // Satiety decreases
-      animateEmoji("💤"); // Sleep emoji for sleeping
+      happiness = Math.max(happiness - 1, 0);
+      alertness = Math.min(alertness + 5, 10);
+      satiety = Math.max(satiety - 2, 0);
+      animateEmoji("💤");
       updatePet();
     }
 
     setInterval(() => {
-      happiness = Math.max(happiness - 1, 0); // Decrease happiness over time
-      alertness = Math.max(alertness - 1, 0); // Decrease alertness over time (pet gets sleepy)
-      satiety = Math.max(satiety - 1, 0); // Decrease satiety over time
+      happiness = Math.max(happiness - 1, 0);
+      alertness = Math.max(alertness - 1, 0);
+      satiety = Math.max(satiety - 1, 0);
       updatePet();
-    }, 5000); // Update every 5 seconds
+    }, 5000); // Update every 5 seconds for pet stats
 
-    // Initialize the pet's status when the page loads
+    // Update the time every second (1000ms) for accuracy
+    setInterval(updateTime, 1000);
+
+    // Initialize the pet's status and time when the page loads
     updatePet();
   </script>
 </body>
