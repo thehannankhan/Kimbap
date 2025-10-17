@@ -169,7 +169,7 @@ body {
 @media (max-width: 768px) {
   body {
     font-family: Pixelify Sans, Arial, sans-serif;
-    background-color: pink;
+    background-color: rgb(133, 180, 115);
     background-image: url(bg1.gif);
     background-size: cover;
     background-repeat: no-repeat;
@@ -181,28 +181,7 @@ body {
     margin-right: auto;
   }
 
-/* Base styles for the time pills */
-    .time-pill {
-      color: #333;
-      padding: 5px 12px;
-      border-radius: 20px;
-      margin: 0 5px;
-      display: inline-block;
-      font-weight: bold;
-      transition: background-color 0.5s; /* Smooth transition for color change */
-    }
 
-    /* Daytime style: Light Blue background */
-    .time-pill.day {
-      background-color: #add8e6; /* Light Blue */
-      color: #1f3f66; /* Darker text for contrast */
-    }
-
-    /* Nighttime style: Navy Blue background */
-    .time-pill.night {
-      background-color: #1f3f66; /* Navy Blue */
-      color: #ffffff; /* White text for contrast */
-    }
 
   #pet {
     font-size: 4rem;
