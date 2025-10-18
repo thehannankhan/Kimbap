@@ -15,7 +15,7 @@
 <body>
   <h1>Kimbap!</h1>
   <p id="combined-time">Loading times...</p>
-  <h3>Safe Travels Hun! 🇸🇬🇻🇳🇳🇿</h3>
+  <h3>Leedle Leedle Leedle! 🧽</h3>
   <div id="pet"><img id="pet-image" src="avatar.gif" width="200"></div> <div id="status">Your pet is happy!</div>
   <div id="controls">
     <button onclick="feedPet()" style="background-color: #38667f;">Feed</button>
@@ -194,7 +194,7 @@
         happiness = Math.min(happiness + 1, 10);
         alertness = Math.max(alertness - 1, 0);
         satiety = Math.min(satiety + 3, 10);
-        animateEmoji("🍖");
+        animateEmoji("🍔");
         updatePet();
       } else {
         document.getElementById("status").textContent = "She is too sleepy to eat! Put her to sleep first.";
@@ -206,7 +206,7 @@
         happiness = Math.min(happiness + 3, 10);
         alertness = Math.max(alertness - 2, 0);
         satiety = Math.max(satiety - 2, 0);
-        animateEmoji("⚽");
+        animateEmoji("🧩");
         updatePet();
       } else if (alertness <= 2) {
         document.getElementById("status").textContent = "She is too sleepy to play! Put her to sleep first.";
