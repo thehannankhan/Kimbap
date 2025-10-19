@@ -18,6 +18,8 @@ body {
   color: white;
   margin-left: auto;
   margin-right: auto;
+  /* UPDATED: Increased body padding to accommodate the slightly taller navbar + padding */
+  padding-bottom: 95px; 
 }
 
 
@@ -165,6 +167,11 @@ body {
   }
 }
 
+/* Base styles for the bottom navigation bar - hidden by default */
+.bottom-nav {
+  display: none; /* Hide for desktop */
+}
+
 /* Media Queries for Mobile Responsiveness */
 @media (max-width: 768px) {
   body {
@@ -179,9 +186,9 @@ body {
     color: white;
     margin-left: auto;
     margin-right: auto;
+    /* This padding is crucial so the content isn't covered by the fixed nav */
+    padding-bottom: 95px; 
   }
-
-
 
   #pet {
     font-size: 4rem;
@@ -195,6 +202,105 @@ body {
 
   .progress-bar-vertical {
     height: 100px;
+  }
+
+  .bottom-nav {
+    display: flex; /* Show for mobile */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* UPDATED: Increased height to 70px */
+    height: 70px; 
+    /* Set the background color */
+    background-color: #4a7a88; 
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    
+    /* MODIFIED: Changed margin to padding for empty space at the very bottom */
+    padding-bottom: 10px; 
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: white; /* Text color */
+    flex-grow: 1; /* Retained flex-grow for side items */
+    height: 100%;
+    font-size: 0.75rem; /* Smaller font for mobile labels */
+    transition: background-color 0.2s;
+    background-color: transparent; 
+  }
+
+  .nav-item:hover {
+    background-color: #34495e;
+  }
+  
+  .nav-item .icon {
+    font-size: 1.5rem;
+    line-height: 1; /* Keep icon vertically centered */
+  }
+
+  .nav-item .label {
+    margin-top: 3px;
+    font-family: 'Pixelify Sans', sans-serif;
+  }
+
+  /* REVISED CSS for the perfect circle orb icon */
+  .bottom-nav .nav-item:nth-child(2) { /* Selects the second nav-item (the middle one) */
+    position: relative;
+    /* Adjusted top to keep the orb visually centered on the bar (70px high + 10px pad) */
+    top: -20px; 
+    
+    /* UPDATED: Orb size */
+    width: 80px; 
+    height: 80px; 
+    border-radius: 15%; 
+    
+    /* Ensures same color as navbar */
+    background-color: #d9a56b; 
+    
+    box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
+    
+    /* Overrides default nav-item flex properties to ensure fixed size */
+    flex-grow: 0; 
+    flex-shrink: 0; 
+    flex-basis: auto;
+
+    /* Margin adjustments to visually separate the side items from the orb */
+    margin-left: 15px; 
+    margin-right: 15px;
+
+    /* Re-center content in the orb */
+    display: flex;
+    flex-direction: column; /* NEW: Need column layout to stack icon and label */
+    align-items: center;
+    justify-content: center; /* Center content vertically */
+    padding-top: 0; 
+  }
+
+  .bottom-nav .nav-item:nth-child(2) .icon {
+    font-size: 2.5rem; 
+    line-height: 1;
+  }
+
+  .bottom-nav .nav-item:nth-child(2) .label {
+    /* NEW: Removed absolute positioning for contained text */
+    position: static; 
+    width: auto;
+    text-align: center;
+    font-size: 0.65rem; /* Slightly smaller to fit */
+    margin-top: 0;
+    color: white; 
+  }
+
+  .bottom-nav .nav-item:nth-child(2):hover {
+    background-color: #34495e; 
   }
 }
 
@@ -214,4 +320,12 @@ body {
 
 .progress-bar-vertical {
   height: 80px;
+}
+
+.primary-icon {
+  filter: invert(61%) sepia(14%) saturate(1234%) hue-rotate(350deg) brightness(85%) contrast(89%);
+}
+
+.secondary-icon {
+  filter: invert(88%) sepia(4%) saturate(6809%) hue-rotate(166deg) brightness(102%) contrast(83%);
 }

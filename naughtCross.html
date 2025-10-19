@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One-Player Tic-Tac-Toe</title>
+    <!-- Load Tailwind CSS for utility styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /*
+        -- CRITICAL: CUSTOM IMAGE SETUP --
+        Replace these placeholder URLs with the actual paths to your X and O images.
+        Ensure your images are roughly square (e.g., 80px x 80px) for best results.
+        */
+        @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Squada+One&family=Tiny5&display=swap');
+
+        :root {
+            --player-image-url: url('avatar.gif'); /* REPLACE THIS with your 'X' image path */
+            --computer-image-url: url('avatarh.gif'); /* REPLACE THIS with your 'O' image path */
+            --cell-size: 100px;
+            --grid-line-color: #cbd5e1; /* Slate-300 */
+        }
+        #game-container {
+            background-color: transparent;
+        }
+        body {
+            font-family: Pixelify Sans;
+        }
+        h1 {
+            color: white;
+        }
+        /* Base Grid Setup */
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, var(--cell-size));
+            grid-template-rows: repeat(3, var(--cell-size));
+            border: 3px solid #1f2937; /* Dark border around the whole board */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #58bfc8; /* Slate-50 */
+        }
+
+        /* Styling for individual cells */
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            border: 1px solid var(--grid-line-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            background-size: 70%; /* Image size inside the cell */
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .cell:hover:not(.player-mark):not(.computer-mark) {
+            background-color: #eff6ff; /* Blue-50 */
+        }
+
+        /* Player's mark (uses the image URL defined in :root) */
+        .cell.player-mark {
+            background-image: var(--player-image-url);
+            cursor: default;
+        }
+
+        /* Computer's mark (uses the image URL defined in :root) */
+        .cell.computer-mark {
+            background-image: var(--computer-image-url);
+            cursor: default;
+        }
+
+        /* Winning cell highlight */
+        .cell.winner-highlight {
+            background-color: #4ade80 !important; /* Green-400 */
+        }
+
+        /* Status and message styling */
+        #game-status {
+            min-height: 40px;
+        }
+
+        @media (max-width: 768px) {
+  body {
+    font-family: Pixelify Sans, Arial, sans-serif;
+    background-color: rgb(133, 180, 115);
+    background-image: url(bg4.gif);
+    background-size: cover;
+    background-repeat: no-repeat;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+    color: white;
+    margin-left: auto;
+    margin-right: auto;
+    /* This padding is crucial so the content isn't covered by the fixed nav */
+    padding-bottom: 95px; 
+  }
+
+  #pet {
+    font-size: 4rem;
+  }
+
+  #controls button {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .progress-bar-vertical {
+    height: 100px;
+  }
+
+  .bottom-nav {
+    display: flex; /* Show for mobile */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* UPDATED: Increased height to 70px */
+    height: 80px; 
+    /* Set the background color */
+    background-color: #4a7a88; 
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    
+    /* MODIFIED: Changed margin to padding for empty space at the very bottom */
+    padding-bottom: 10px; 
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: white; /* Text color */
+    flex-grow: 1; /* Retained flex-grow for side items */
+    height: 100%;
+    font-size: 0.75rem; /* Smaller font for mobile labels */
+    transition: background-color 0.2s;
+    background-color: transparent; 
+  }
+
+  .nav-item:hover {
+    background-color: #34495e;
+  }
+  
+  .nav-item .icon {
+    font-size: 1.5rem;
+    line-height: 1; /* Keep icon vertically centered */
+  }
+
+  .nav-item .label {
+    margin-top: 3px;
+    font-family: 'Pixelify Sans', sans-serif;
+  }
+
+  /* REVISED CSS for the perfect circle orb icon */
+  .bottom-nav .nav-item:nth-child(2) { /* Selects the second nav-item (the middle one) */
+    position: relative;
+    /* Adjusted top to keep the orb visually centered on the bar (70px high + 10px pad) */
+    top: -20px; 
+    
+    /* UPDATED: Orb size */
+    width: 80px; 
+    height: 80px; 
+    border-radius: 15%; 
+    
+    /* Ensures same color as navbar */
+    background-color: #d9a56b; 
+    
+    box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
+    
+    /* Overrides default nav-item flex properties to ensure fixed size */
+    flex-grow: 0; 
+    flex-shrink: 0; 
+    flex-basis: auto;
+
+    /* Margin adjustments to visually separate the side items from the orb */
+    margin-left: 15px; 
+    margin-right: 15px;
+
+    /* Re-center content in the orb */
+    display: flex;
+    flex-direction: column; /* NEW: Need column layout to stack icon and label */
+    align-items: center;
+    justify-content: center; /* Center content vertically */
+    padding-top: 0; 
+  }
+
+  .bottom-nav .nav-item:nth-child(2) .icon {
+    font-size: 2.5rem; 
+    line-height: 1;
+  }
+
+  .bottom-nav .nav-item:nth-child(2) .label {
+    /* NEW: Removed absolute positioning for contained text */
+    position: static; 
+    width: auto;
+    text-align: center;
+    font-size: 0.65rem; /* Slightly smaller to fit */
+    margin-top: 0;
+    color: white; 
+  }
+
+  .bottom-nav .nav-item:nth-child(2):hover {
+    background-color: #34495e; 
+  }
+}
+
+@media (max-width: 470px) {
+  .progress-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: nowrap;
+    gap: 1rem;
+  }
+
+  .progress-bar-vertical {
+    height: 80px;
+  }
+}
+
+.progress-bar-vertical {
+  height: 80px;
+}
+
+.primary-icon {
+  filter: invert(61%) sepia(14%) saturate(1234%) hue-rotate(350deg) brightness(85%) contrast(89%);
+}
+
+.secondary-icon {
+  filter: invert(88%) sepia(4%) saturate(6809%) hue-rotate(166deg) brightness(102%) contrast(83%);
+}
+
+button {
+     color: #fff;
+     background-color: #6abc3a;
+     padding: 15px 40px 15px 40px;
+     margin: 10px;
+      font-size: 14px;
+  font-family: "Press Start 2P", system-ui;
+     border: 0;
+     box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, 0px 10px #00000038, 5px 5px #00000038, -5px 5px #00000038, inset 0px 5px #ffffff36 ;
+     cursor: pointer;
+     width: 200px;
+     height: 45px;
+}
+ button:active {
+     transform: translateY(5px);
+     box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black,inset 0px 5px #00000038;
+}
+    </style>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4 ">
+
+    <div id="game-container" class="bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center max-w-sm w-full">
+        <h1 class="text-3xl font-extrabold mb-4">TIC-TAC-TOE</h1>
+
+        <!-- Game Status Display -->
+        <div id="game-status" class="text-xl font-semibold text-indigo-600 mb-6 transition-all duration-300">
+            Kimbap's Turn
+        </div>
+
+        <!-- Game Board -->
+        <div id="board" class="mb-8">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <!-- Restart Button -->
+        <button id="restart-btn" style="background-color: #d83434;">RESTART!</button>
+    </div>
+    <nav class="bottom-nav">
+        <a href="naughtCross.html" class="nav-item">
+          <span class="icon"><img src="games.svg" width="50px" class="secondary-icon"></span>
+          <span class="label"></span>
+        </a>
+        <a href="index.html" class="nav-item">
+          <span class="icon"><img src="home.svg" width="50px" class="primary-icon"></span>
+          <span class="label"></span>
+        </a>
+        <a href="settings.html" class="nav-item">
+          <span class="icon"><img src="settings.svg" width="50px" class="secondary-icon"></span>
+          <span class="label"></span>
+        </a>
+      </nav>
+    <script>
+        // --- JAVASCRIPT LOGIC ---
+
+        // Element references
+        const cells = document.querySelectorAll('.cell');
+        const statusDisplay = document.getElementById('game-status');
+        const restartButton = document.getElementById('restart-btn');
+
+        // Game state variables
+        let board = Array(9).fill(''); // Represents the 3x3 grid state: ['', 'X', 'O', ...]
+        let currentPlayer = 'player'; // 'player' (X) or 'computer' (O)
+        let gameActive = true;
+
+        // Custom mark identifiers (these match the CSS classes)
+        const PLAYER_MARK = 'player-mark';
+        const COMPUTER_MARK = 'computer-mark';
+
+        // All possible winning combinations (indexes of the board array)
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]             // Diagonals
+        ];
+
+        // --- Core Game Functions ---
+
+        /**
+         * Updates the internal board state and the cell's appearance.
+         * @param {HTMLElement} clickedCell - The DOM element of the cell.
+         * @param {number} clickedCellIndex - The index (0-8) of the cell.
+         */
+        function handleCellPlayed(clickedCell, clickedCellIndex) {
+            // Update the internal state: 'player' or 'computer'
+            board[clickedCellIndex] = currentPlayer;
+
+            // Add the corresponding CSS class to display the custom image
+            clickedCell.classList.add(currentPlayer === 'player' ? PLAYER_MARK : COMPUTER_MARK);
+        }
+
+        /**
+         * Checks if the game has ended (win or draw).
+         * @returns {boolean} True if the game is over, false otherwise.
+         */
+        function handleResultValidation() {
+            let roundWon = false;
+            let winningLine = null;
+
+            for (const condition of winningConditions) {
+                const [a, b, c] = condition;
+                const markerA = board[a];
+                const markerB = board[b];
+                const markerC = board[c];
+
+                // Check if all three cells in the condition are marked by the same player
+                if (markerA !== '' && markerA === markerB && markerB === markerC) {
+                    roundWon = true;
+                    winningLine = condition;
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                gameActive = false;
+                statusDisplay.innerHTML = `<span class="text-green-600">${currentPlayer === 'player' ? 'You' : 'Hannan'} Won! 🎉</span>`;
+                // Highlight winning cells
+                winningLine.forEach(index => cells[index].classList.add('winner-highlight'));
+                return true;
+            }
+
+            // Check for a draw (board is full and no winner)
+            if (!board.includes('')) {
+                gameActive = false;
+                statusDisplay.innerHTML = `<span class="text-yellow-600">It's a Draw! 🤝</span>`;
+                return true;
+            }
+
+            return false;
+        }
+
+        /**
+         * Switches the current player and triggers the computer move if necessary.
+         */
+        function handlePlayerChange() {
+            currentPlayer = currentPlayer === 'player' ? 'computer' : 'player';
+            const statusText = currentPlayer === 'player' ? 'Your Turn' : 'Hannan\'s Turn';
+            statusDisplay.innerHTML = `<span class="text-${currentPlayer === 'player' ? 'indigo-600' : 'red-600'}">${statusText}</span>`;
+
+            // If it's the computer's turn, wait a moment and then execute its move
+            if (gameActive && currentPlayer === 'computer') {
+                setTimeout(handleComputerMove, 700);
+            }
+        }
+
+        // --- AI Logic (Minimax-Lite) ---
+
+        /**
+         * Simple AI to determine the computer's next move.
+         */
+        function handleComputerMove() {
+            // 1. Check for a winning move (Win immediately)
+            let move = findImmediateMove(COMPUTER_MARK);
+            if (move !== null) {
+                placeMark(move);
+                return;
+            }
+
+            // 2. Check for a blocking move (Block player's immediate win)
+            move = findImmediateMove(PLAYER_MARK);
+            if (move !== null) {
+                placeMark(move);
+                return;
+            }
+
+            // 3. Take the center spot if available (High strategic value)
+            if (board[4] === '') {
+                placeMark(4);
+                return;
+            }
+
+            // 4. Take a random available corner
+            const corners = [0, 2, 6, 8].filter(i => board[i] === '');
+            if (corners.length > 0) {
+                move = corners[Math.floor(Math.random() * corners.length)];
+                placeMark(move);
+                return;
+            }
+
+            // 5. Take any remaining random available spot
+            const availableMoves = board.map((val, index) => val === '' ? index : null).filter(val => val !== null);
+            if (availableMoves.length > 0) {
+                move = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+                placeMark(move);
+                return;
+            }
+        }
+
+        /**
+         * Finds a move that leads to an immediate win for the current player or blocks the opponent.
+         * @param {string} marker - The marker to check ('player' or 'computer').
+         * @returns {number|null} The index of the winning/blocking move, or null.
+         */
+        function findImmediateMove(marker) {
+            for (const condition of winningConditions) {
+                let emptySpot = null;
+                let markerCount = 0;
+
+                for (const index of condition) {
+                    if (board[index] === marker) {
+                        markerCount++;
+                    } else if (board[index] === '') {
+                        emptySpot = index;
+                    }
+                }
+                
+                // If two markers are present and one spot is empty, this is the critical move
+                if (markerCount === 2 && emptySpot !== null) {
+                    return emptySpot;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Executes a move on the board by a player (either human or AI).
+         * @param {number} index - The index (0-8) of the move.
+         */
+        function placeMark(index) {
+            const cell = cells[index];
+            handleCellPlayed(cell, index);
+            if (!handleResultValidation()) {
+                handlePlayerChange();
+            }
+        }
+
+        // --- Event Listeners and Initialization ---
+
+        /**
+         * Handles a click event from the human player.
+         * @param {Event} event - The click event object.
+         */
+        function handleCellClick(event) {
+            const clickedCell = event.target;
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+            // Check if: 
+            // 1. The spot is already taken, 
+            // 2. The game is over, or 
+            // 3. It's the computer's turn.
+            if (board[clickedCellIndex] !== '' || !gameActive || currentPlayer !== 'player') {
+                return;
+            }
+
+            placeMark(clickedCellIndex);
+        }
+
+        /**
+         * Resets the game state and board visuals.
+         */
+        function handleRestartGame() {
+            gameActive = true;
+            currentPlayer = 'player';
+            board = Array(9).fill('');
+            statusDisplay.innerHTML = '<span class="text-indigo-600">Player\'s Turn</span>';
+
+            cells.forEach(cell => {
+                // Remove all custom mark and highlight classes
+                cell.classList.remove(PLAYER_MARK, COMPUTER_MARK, 'winner-highlight');
+            });
+        }
+
+        // Attach event listeners
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        restartButton.addEventListener('click', handleRestartGame);
+
+        // Initial status update
+        handleRestartGame();
+
+    </script>
+</body>
+</html>
