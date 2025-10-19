@@ -194,6 +194,7 @@ body {
 
   #pet {
     font-size: 4rem;
+    margin: -25px;
   }
 
   #controls button {
