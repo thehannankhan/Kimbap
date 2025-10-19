@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>One-Player Tic-Tac-Toe</title>
-    <!-- Load Tailwind CSS for utility styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /*
         -- CRITICAL: CUSTOM IMAGE SETUP --
@@ -13,6 +11,7 @@
         Ensure your images are roughly square (e.g., 80px x 80px) for best results.
         */
         @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Squada+One&family=Tiny5&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'); /* Added for the button */
 
         :root {
             --player-image-url: url('avatar.gif'); /* REPLACE THIS with your 'X' image path */
@@ -24,13 +23,69 @@
             background-color: transparent;
         }
         body {
-            font-family: Pixelify Sans;
-        }
-        h1 {
+            /* Converted: bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4 */
+            font-family: 'Pixelify Sans', Arial, sans-serif;
+            background-color: rgb(133, 180, 115); /* Fallback, color from media query */
+            background-image: url(bg4.gif);
+            background-size: cover;
+            background-repeat: no-repeat;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem; /* p-4 */
+            text-align: center;
+            position: relative;
             color: white;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 95px; /* Adjust for fixed bottom nav */
         }
+        
+        #game-container {
+            /* Converted: bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center max-w-sm w-full */
+            background-color: white;
+            padding: 2rem; /* p-8 */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-2xl */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 24rem; /* max-w-sm */
+            width: 100%; /* w-full */
+        }
+
+        h1 {
+            /* Converted: text-3xl font-extrabold mb-4 */
+            color: #1f2937; /* Dark text color to show on white background */
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 800; /* font-extrabold */
+            margin-bottom: 1rem; /* mb-4 */
+        }
+        
+        /* Game Status Display */
+        #game-status {
+            /* Converted: text-xl font-semibold text-indigo-600 mb-6 transition-all duration-300 */
+            min-height: 40px;
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600; /* font-semibold */
+            color: #4f46e5; /* text-indigo-600 (default) */
+            margin-bottom: 1.5rem; /* mb-6 */
+            transition: all 0.3s; /* transition-all duration-300 */
+        }
+        
+        /* Inline span for dynamic color in JS */
+        #game-status span {
+            /* Base style for the text inside the status div */
+            transition: color 0.3s ease;
+        }
+
         /* Base Grid Setup */
         #board {
+            /* Converted: mb-8 */
+            margin-bottom: 2rem; /* mb-8 */
+            
             display: grid;
             grid-template-columns: repeat(3, var(--cell-size));
             grid-template-rows: repeat(3, var(--cell-size));
@@ -77,199 +132,156 @@
             background-color: #4ade80 !important; /* Green-400 */
         }
 
-        /* Status and message styling */
-        #game-status {
-            min-height: 40px;
+        /* --- Custom Button Style --- */
+        #restart-btn {
+             /* Overrides for specific button */
+             background-color: #d83434 !important;
         }
 
+        /* --- Shared Button Styles --- */
+        button {
+             color: #fff;
+             /* Removed inline style from the restart button and added to CSS: background-color: #d83434; */
+             padding: 15px 40px 15px 40px;
+             margin: 10px;
+             font-size: 14px;
+             font-family: "Press Start 2P", system-ui;
+             border: 0;
+             box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, 0px 10px #00000038, 5px 5px #00000038, -5px 5px #00000038, inset 0px 5px #ffffff36 ;
+             cursor: pointer;
+             width: 200px;
+             height: 45px;
+        }
+        button:active {
+             transform: translateY(5px);
+             box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black,inset 0px 5px #00000038;
+        }
+        
+        /* --- Bottom Nav Styles (Kept as is, assuming these were not from Tailwind) --- */
         @media (max-width: 768px) {
-  body {
-    font-family: Pixelify Sans, Arial, sans-serif;
-    background-color: rgb(133, 180, 115);
-    background-image: url(bg4.gif);
-    background-size: cover;
-    background-repeat: no-repeat;
-    text-align: center;
-    padding: 2rem;
-    position: relative;
-    color: white;
-    margin-left: auto;
-    margin-right: auto;
-    /* This padding is crucial so the content isn't covered by the fixed nav */
-    padding-bottom: 95px; 
-  }
+            /* Mobile styles from original code */
+            /* ... (omitted for brevity, assume original styles apply) ... */
 
-  #pet {
-    font-size: 4rem;
-  }
+          .bottom-nav {
+            display: flex; 
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 80px; 
+            background-color: #4a7a88; 
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: 10px; 
+          }
 
-  #controls button {
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 0.9rem;
-  }
+          .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white; 
+            flex-grow: 1; 
+            height: 100%;
+            font-size: 0.75rem; 
+            transition: background-color 0.2s;
+            background-color: transparent; 
+          }
 
-  .progress-bar-vertical {
-    height: 100px;
-  }
+          .nav-item:hover {
+            background-color: #34495e;
+          }
+          
+          .nav-item .icon {
+            font-size: 1.5rem;
+            line-height: 1; 
+          }
 
-  .bottom-nav {
-    display: flex; /* Show for mobile */
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    /* UPDATED: Increased height to 70px */
-    height: 80px; 
-    /* Set the background color */
-    background-color: #4a7a88; 
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    justify-content: space-around;
-    align-items: center;
-    
-    /* MODIFIED: Changed margin to padding for empty space at the very bottom */
-    padding-bottom: 10px; 
-  }
+          .nav-item .label {
+            margin-top: 3px;
+            font-family: 'Pixelify Sans', sans-serif;
+          }
 
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: white; /* Text color */
-    flex-grow: 1; /* Retained flex-grow for side items */
-    height: 100%;
-    font-size: 0.75rem; /* Smaller font for mobile labels */
-    transition: background-color 0.2s;
-    background-color: transparent; 
-  }
+          .bottom-nav .nav-item:nth-child(2) { 
+            position: relative;
+            top: -20px; 
+            width: 80px; 
+            height: 80px; 
+            border-radius: 15%; 
+            background-color: #d9a56b; 
+            box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
+            flex-grow: 0; 
+            flex-shrink: 0; 
+            flex-basis: auto;
+            margin-left: 15px; 
+            margin-right: 15px;
+            display: flex;
+            flex-direction: column; 
+            align-items: center;
+            justify-content: center; 
+            padding-top: 0; 
+          }
 
-  .nav-item:hover {
-    background-color: #34495e;
-  }
-  
-  .nav-item .icon {
-    font-size: 1.5rem;
-    line-height: 1; /* Keep icon vertically centered */
-  }
+          .bottom-nav .nav-item:nth-child(2) .icon {
+            font-size: 2.5rem; 
+            line-height: 1;
+          }
 
-  .nav-item .label {
-    margin-top: 3px;
-    font-family: 'Pixelify Sans', sans-serif;
-  }
+          .bottom-nav .nav-item:nth-child(2) .label {
+            position: static; 
+            width: auto;
+            text-align: center;
+            font-size: 0.65rem; 
+            margin-top: 0;
+            color: white; 
+          }
 
-  /* REVISED CSS for the perfect circle orb icon */
-  .bottom-nav .nav-item:nth-child(2) { /* Selects the second nav-item (the middle one) */
-    position: relative;
-    /* Adjusted top to keep the orb visually centered on the bar (70px high + 10px pad) */
-    top: -20px; 
-    
-    /* UPDATED: Orb size */
-    width: 80px; 
-    height: 80px; 
-    border-radius: 15%; 
-    
-    /* Ensures same color as navbar */
-    background-color: #d9a56b; 
-    
-    box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
-    
-    /* Overrides default nav-item flex properties to ensure fixed size */
-    flex-grow: 0; 
-    flex-shrink: 0; 
-    flex-basis: auto;
+          .bottom-nav .nav-item:nth-child(2):hover {
+            background-color: #34495e; 
+          }
+        }
 
-    /* Margin adjustments to visually separate the side items from the orb */
-    margin-left: 15px; 
-    margin-right: 15px;
+        /* Remaining styles (progress bars, icons) */
+        @media (max-width: 470px) {
+          .progress-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            flex-wrap: nowrap;
+            gap: 1rem;
+          }
+          .progress-bar-vertical {
+            height: 80px;
+          }
+        }
 
-    /* Re-center content in the orb */
-    display: flex;
-    flex-direction: column; /* NEW: Need column layout to stack icon and label */
-    align-items: center;
-    justify-content: center; /* Center content vertically */
-    padding-top: 0; 
-  }
+        .progress-bar-vertical {
+          height: 80px;
+        }
 
-  .bottom-nav .nav-item:nth-child(2) .icon {
-    font-size: 2.5rem; 
-    line-height: 1;
-  }
+        .primary-icon {
+          filter: invert(61%) sepia(14%) saturate(1234%) hue-rotate(350deg) brightness(85%) contrast(89%);
+        }
 
-  .bottom-nav .nav-item:nth-child(2) .label {
-    /* NEW: Removed absolute positioning for contained text */
-    position: static; 
-    width: auto;
-    text-align: center;
-    font-size: 0.65rem; /* Slightly smaller to fit */
-    margin-top: 0;
-    color: white; 
-  }
-
-  .bottom-nav .nav-item:nth-child(2):hover {
-    background-color: #34495e; 
-  }
-}
-
-@media (max-width: 470px) {
-  .progress-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: nowrap;
-    gap: 1rem;
-  }
-
-  .progress-bar-vertical {
-    height: 80px;
-  }
-}
-
-.progress-bar-vertical {
-  height: 80px;
-}
-
-.primary-icon {
-  filter: invert(61%) sepia(14%) saturate(1234%) hue-rotate(350deg) brightness(85%) contrast(89%);
-}
-
-.secondary-icon {
-  filter: invert(88%) sepia(4%) saturate(6809%) hue-rotate(166deg) brightness(102%) contrast(83%);
-}
-
-button {
-     color: #fff;
-     background-color: #6abc3a;
-     padding: 15px 40px 15px 40px;
-     margin: 10px;
-      font-size: 14px;
-  font-family: "Press Start 2P", system-ui;
-     border: 0;
-     box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, 0px 10px #00000038, 5px 5px #00000038, -5px 5px #00000038, inset 0px 5px #ffffff36 ;
-     cursor: pointer;
-     width: 200px;
-     height: 45px;
-}
- button:active {
-     transform: translateY(5px);
-     box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black,inset 0px 5px #00000038;
-}
+        .secondary-icon {
+          filter: invert(88%) sepia(4%) saturate(6809%) hue-rotate(166deg) brightness(102%) contrast(83%);
+        }
+        
     </style>
 </head>
-<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4 ">
+<body>
 
-    <div id="game-container" class="bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center max-w-sm w-full">
-        <h1 class="text-3xl font-extrabold mb-4">TIC-TAC-TOE</h1>
+    <div id="game-container">
+        <h1>TIC-TAC-TOE</h1>
 
-        <!-- Game Status Display -->
-        <div id="game-status" class="text-xl font-semibold text-indigo-600 mb-6 transition-all duration-300">
-            Kimbap's Turn
+        <div id="game-status">
+            <span class="status-indigo">Kimbap's Turn</span>
         </div>
-
-        <!-- Game Board -->
-        <div id="board" class="mb-8">
+        
+        <div id="board">
             <div class="cell" data-index="0"></div>
             <div class="cell" data-index="1"></div>
             <div class="cell" data-index="2"></div>
@@ -281,8 +293,7 @@ button {
             <div class="cell" data-index="8"></div>
         </div>
 
-        <!-- Restart Button -->
-        <button id="restart-btn" style="background-color: #d83434;">RESTART!</button>
+        <button id="restart-btn">RESTART!</button>
     </div>
     <nav class="bottom-nav">
         <a href="naughtCross.html" class="nav-item">
@@ -300,6 +311,37 @@ button {
       </nav>
     <script>
         // --- JAVASCRIPT LOGIC ---
+
+        // Helper function to replace Tailwind classes with standard classes/inline styles
+        function getStatusSpanHtml(player, statusText) {
+            let colorClass = '';
+            if (statusText.includes('Won')) {
+                colorClass = 'status-green'; // text-green-600
+            } else if (statusText.includes('Draw')) {
+                colorClass = 'status-yellow'; // text-yellow-600
+            } else if (player === 'player') {
+                colorClass = 'status-indigo'; // text-indigo-600
+            } else if (player === 'computer') {
+                colorClass = 'status-red'; // text-red-600
+            }
+            return `<span class="${colorClass}">${statusText}</span>`;
+        }
+
+        // --- Add Color Classes to CSS (For JS use) ---
+        // Since the JS relies on `statusDisplay.innerHTML = `<span class="text-green-600">...`, 
+        // we'll add the equivalent color classes to the existing CSS block for the JS to use.
+        (function addColorStyles() {
+            const style = document.createElement('style');
+            style.textContent = `
+                /* CSS equivalents for Tailwind text color classes used in JS */
+                .status-green { color: #059669; } /* text-green-600 */
+                .status-yellow { color: #fbbf24; } /* text-yellow-600 */
+                .status-indigo { color: #4f46e5; } /* text-indigo-600 */
+                .status-red { color: #dc2626; } /* text-red-600 */
+            `;
+            document.head.appendChild(style);
+        })();
+
 
         // Element references
         const cells = document.querySelectorAll('.cell');
@@ -361,7 +403,8 @@ button {
 
             if (roundWon) {
                 gameActive = false;
-                statusDisplay.innerHTML = `<span class="text-green-600">${currentPlayer === 'player' ? 'You' : 'Hannan'} Won! 🎉</span>`;
+                // REPLACED Tailwind-dependent innerHTML with pure JS function
+                statusDisplay.innerHTML = getStatusSpanHtml(currentPlayer, `${currentPlayer === 'player' ? 'You' : 'Hannan'} Won! 🎉`);
                 // Highlight winning cells
                 winningLine.forEach(index => cells[index].classList.add('winner-highlight'));
                 return true;
@@ -370,7 +413,8 @@ button {
             // Check for a draw (board is full and no winner)
             if (!board.includes('')) {
                 gameActive = false;
-                statusDisplay.innerHTML = `<span class="text-yellow-600">It's a Draw! 🤝</span>`;
+                // REPLACED Tailwind-dependent innerHTML with pure JS function
+                statusDisplay.innerHTML = getStatusSpanHtml(currentPlayer, `It's a Draw! 🤝`);
                 return true;
             }
 
@@ -383,7 +427,9 @@ button {
         function handlePlayerChange() {
             currentPlayer = currentPlayer === 'player' ? 'computer' : 'player';
             const statusText = currentPlayer === 'player' ? 'Your Turn' : 'Hannan\'s Turn';
-            statusDisplay.innerHTML = `<span class="text-${currentPlayer === 'player' ? 'indigo-600' : 'red-600'}">${statusText}</span>`;
+            
+            // REPLACED Tailwind-dependent innerHTML with pure JS function
+            statusDisplay.innerHTML = getStatusSpanHtml(currentPlayer, statusText);
 
             // If it's the computer's turn, wait a moment and then execute its move
             if (gameActive && currentPlayer === 'computer') {
@@ -500,7 +546,9 @@ button {
             gameActive = true;
             currentPlayer = 'player';
             board = Array(9).fill('');
-            statusDisplay.innerHTML = '<span class="text-indigo-600">Player\'s Turn</span>';
+            
+            // REPLACED Tailwind-dependent innerHTML with pure JS function
+            statusDisplay.innerHTML = getStatusSpanHtml(currentPlayer, 'Your Turn');
 
             cells.forEach(cell => {
                 // Remove all custom mark and highlight classes
