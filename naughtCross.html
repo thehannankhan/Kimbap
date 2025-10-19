@@ -16,7 +16,7 @@
 
         :root {
             --player-image-url: url('avatar.gif'); /* REPLACE THIS with your 'X' image path */
-            --computer-image-url: url('avatarh.gif'); /* REPLACE THIS with your 'O' image path */
+            --computer-image-url: url('avatarH.gif'); /* REPLACE THIS with your 'O' image path */
             --cell-size: 100px;
             --grid-line-color: #cbd5e1; /* Slate-300 */
         }
@@ -68,7 +68,7 @@
 
         /* Computer's mark (uses the image URL defined in :root) */
         .cell.computer-mark {
-            background-image: url(avatarH.gif);
+            background-image: var(--computer-image-url);
             cursor: default;
         }
 
