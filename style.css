@@ -51,6 +51,7 @@ body {
 #pet {
   font-size: 5rem;
   transition: transform 0.5s ease-in-out;
+  margin: -25px;
 }
 
 #status {
