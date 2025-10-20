@@ -1,277 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>One-Player Tic-Tac-Toe</title>
-    <!-- Load Tailwind CSS for utility styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /*
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One-Player Tic-Tac-Toe</title>
+  <!-- Load Tailwind CSS for utility styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /*
         -- CRITICAL: CUSTOM IMAGE SETUP --
         Replace these placeholder URLs with the actual paths to your X and O images.
         Ensure your images are roughly square (e.g., 80px x 80px) for best results.
         */
-        @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Squada+One&family=Tiny5&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Squada+One&family=Tiny5&display=swap');
 
-        :root {
-            --player-image-url: url('avatar.gif'); /* REPLACE THIS with your 'X' image path */
-            --computer-image-url: url('avatar2.gif'); /* REPLACE THIS with your 'O' image path */
-            --cell-size: 100px;
-            --grid-line-color: #cbd5e1; /* Slate-300 */
-        }
-        body {
-            font-family: Pixelify Sans;
-        }
-        /* Base Grid Setup */
-        #board {
-            display: grid;
-            grid-template-columns: repeat(3, var(--cell-size));
-            grid-template-rows: repeat(3, var(--cell-size));
-            border: 3px solid #1f2937; /* Dark border around the whole board */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            border-radius: 10px;
-            overflow: hidden;
-            background-color: #f8fafc; /* Slate-50 */
-        }
+    :root {
+      --player-image-url: url('avatar.gif');
+      /* REPLACE THIS with your 'X' image path */
+      --computer-image-url: url('avatar2.gif');
+      /* REPLACE THIS with your 'O' image path */
+      --cell-size: 100px;
+      --grid-line-color: #cbd5e1;
+      /* Slate-300 */
+    }
 
-        /* Styling for individual cells */
-        .cell {
-            width: var(--cell-size);
-            height: var(--cell-size);
-            border: 1px solid var(--grid-line-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            background-size: 70%; /* Image size inside the cell */
-            background-repeat: no-repeat;
-            background-position: center;
-        }
+    body {
+      font-family: Pixelify Sans;
+    }
 
-        .cell:hover:not(.player-mark):not(.computer-mark) {
-            background-color: #eff6ff; /* Blue-50 */
-        }
+    /* Base Grid Setup */
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, var(--cell-size));
+      grid-template-rows: repeat(3, var(--cell-size));
+      border: 3px solid #1f2937;
+      /* Dark border around the whole board */
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      background-color: #f8fafc;
+      /* Slate-50 */
+    }
 
-        /* Player's mark (uses the image URL defined in :root) */
-        .cell.player-mark {
-            background-image: var(--player-image-url);
-            cursor: default;
-        }
+    /* Styling for individual cells */
+    .cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      border: 1px solid var(--grid-line-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      background-size: 70%;
+      /* Image size inside the cell */
+      background-repeat: no-repeat;
+      background-position: center;
+    }
 
-        /* Computer's mark (uses the image URL defined in :root) */
-        .cell.computer-mark {
-            background-image: var(--computer-image-url);
-            cursor: default;
-        }
+    .cell:hover:not(.player-mark):not(.computer-mark) {
+      background-color: #eff6ff;
+      /* Blue-50 */
+    }
 
-        /* Winning cell highlight */
-        .cell.winner-highlight {
-            background-color: #4ade80 !important; /* Green-400 */
-        }
+    /* Player's mark (uses the image URL defined in :root) */
+    .cell.player-mark {
+      background-image: var(--player-image-url);
+      cursor: default;
+    }
 
-        /* Status and message styling */
-        #game-status {
-            min-height: 40px;
-        }
+    /* Computer's mark (uses the image URL defined in :root) */
+    .cell.computer-mark {
+      background-image: var(--computer-image-url);
+      cursor: default;
+    }
 
-        @media (max-width: 768px) {
-  body {
-    font-family: Pixelify Sans, Arial, sans-serif;
-    background-color: rgb(133, 180, 115);
-    background-image: url(bg1.gif);
-    background-size: cover;
-    background-repeat: no-repeat;
-    text-align: center;
-    padding: 2rem;
-    position: relative;
-    color: white;
-    margin-left: auto;
-    margin-right: auto;
-    /* This padding is crucial so the content isn't covered by the fixed nav */
-    padding-bottom: 95px; 
-  }
+    /* Winning cell highlight */
+    .cell.winner-highlight {
+      background-color: #4ade80 !important;
+      /* Green-400 */
+    }
 
-  #pet {
-    font-size: 4rem;
-  }
+    /* Status and message styling */
+    #game-status {
+      min-height: 40px;
+    }
 
-  #controls button {
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 0.9rem;
-  }
+    @media (max-width: 768px) {
+      body {
+        font-family: Pixelify Sans, Arial, sans-serif;
+        background-color: rgb(133, 180, 115);
+        background-image: url(bgs/bg3.GIF);
+        background-size: 800px;
+        background-repeat: no-repeat;
+        text-align: center;
+        padding: 2rem;
+        position: relative;
+        color: white;
+        margin-left: auto;
+        margin-right: auto;
+        /* This padding is crucial so the content isn't covered by the fixed nav */
+        padding-bottom: 95px;
+      }
 
-  .progress-bar-vertical {
-    height: 100px;
-  }
+      #pet {
+        font-size: 4rem;
+      }
 
-  .bottom-nav {
-    display: flex; /* Show for mobile */
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    /* UPDATED: Increased height to 70px */
-    height: 80px; 
-    /* Set the background color */
-    background-color: #4a7a88; 
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
-    justify-content: space-around;
-    align-items: center;
-    
-    /* MODIFIED: Changed margin to padding for empty space at the very bottom */
-    padding-bottom: 10px; 
-  }
+      #controls button {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 0.9rem;
+      }
 
-  .nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    color: white; /* Text color */
-    flex-grow: 1; /* Retained flex-grow for side items */
-    height: 100%;
-    font-size: 0.75rem; /* Smaller font for mobile labels */
-    transition: background-color 0.2s;
-    background-color: transparent; 
-  }
+      .progress-bar-vertical {
+        height: 100px;
+      }
 
-  .nav-item:hover {
-    background-color: #34495e;
-  }
-  
-  .nav-item .icon {
-    font-size: 1.5rem;
-    line-height: 1; /* Keep icon vertically centered */
-  }
+      .bottom-nav {
+        display: flex;
+        /* Show for mobile */
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        /* UPDATED: Increased height to 70px */
+        height: 80px;
+        /* Set the background color */
+        background-color: #4a7a88;
+        box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        justify-content: space-around;
+        align-items: center;
 
-  .nav-item .label {
-    margin-top: 3px;
-    font-family: 'Pixelify Sans', sans-serif;
-  }
+        /* MODIFIED: Changed margin to padding for empty space at the very bottom */
+        padding-bottom: 10px;
+      }
 
-  /* REVISED CSS for the perfect circle orb icon */
-  .bottom-nav .nav-item:nth-child(2) { /* Selects the second nav-item (the middle one) */
-    position: relative;
-    /* Adjusted top to keep the orb visually centered on the bar (70px high + 10px pad) */
-    top: -20px; 
-    
-    /* UPDATED: Orb size */
-    width: 80px; 
-    height: 80px; 
-    border-radius: 15%; 
-    
-    /* Ensures same color as navbar */
-    background-color: #d9a56b; 
-    
-    box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
-    
-    /* Overrides default nav-item flex properties to ensure fixed size */
-    flex-grow: 0; 
-    flex-shrink: 0; 
-    flex-basis: auto;
+      .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: white;
+        /* Text color */
+        flex-grow: 1;
+        /* Retained flex-grow for side items */
+        height: 100%;
+        font-size: 0.75rem;
+        /* Smaller font for mobile labels */
+        transition: background-color 0.2s;
+        background-color: transparent;
+      }
 
-    /* Margin adjustments to visually separate the side items from the orb */
-    margin-left: 15px; 
-    margin-right: 15px;
+      .nav-item:hover {
+        background-color: #34495e;
+      }
 
-    /* Re-center content in the orb */
-    display: flex;
-    flex-direction: column; /* NEW: Need column layout to stack icon and label */
-    align-items: center;
-    justify-content: center; /* Center content vertically */
-    padding-top: 0; 
-  }
+      .nav-item .icon {
+        font-size: 1.5rem;
+        line-height: 1;
+        /* Keep icon vertically centered */
+      }
 
-  .bottom-nav .nav-item:nth-child(2) .icon {
-    font-size: 2.5rem; 
-    line-height: 1;
-  }
+      .nav-item .label {
+        margin-top: 3px;
+        font-family: 'Pixelify Sans', sans-serif;
+      }
 
-  .bottom-nav .nav-item:nth-child(2) .label {
-    /* NEW: Removed absolute positioning for contained text */
-    position: static; 
-    width: auto;
-    text-align: center;
-    font-size: 0.65rem; /* Slightly smaller to fit */
-    margin-top: 0;
-    color: white; 
-  }
+      /* REVISED CSS for the perfect circle orb icon */
+      .bottom-nav .nav-item:nth-child(2) {
+        /* Selects the second nav-item (the middle one) */
+        position: relative;
+        /* Adjusted top to keep the orb visually centered on the bar (70px high + 10px pad) */
+        top: -20px;
 
-  .bottom-nav .nav-item:nth-child(2):hover {
-    background-color: #34495e; 
-  }
-}
+        /* UPDATED: Orb size */
+        width: 80px;
+        height: 80px;
+        border-radius: 15%;
 
-@media (max-width: 470px) {
-  .progress-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: nowrap;
-    gap: 1rem;
-  }
+        /* Ensures same color as navbar */
+        background-color: #d9a56b;
 
-  .progress-bar-vertical {
-    height: 80px;
-  }
-}
+        box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
 
-.progress-bar-vertical {
-  height: 80px;
-}
+        /* Overrides default nav-item flex properties to ensure fixed size */
+        flex-grow: 0;
+        flex-shrink: 0;
+        flex-basis: auto;
 
-.primary-icon {
-  filter: invert(61%) sepia(14%) saturate(1234%) hue-rotate(350deg) brightness(85%) contrast(89%);
-}
+        /* Margin adjustments to visually separate the side items from the orb */
+        margin-left: 15px;
+        margin-right: 15px;
 
-.secondary-icon {
-  filter: invert(88%) sepia(4%) saturate(6809%) hue-rotate(166deg) brightness(102%) contrast(83%);
-}
+        /* Re-center content in the orb */
+        display: flex;
+        flex-direction: column;
+        /* NEW: Need column layout to stack icon and label */
+        align-items: center;
+        justify-content: center;
+        /* Center content vertically */
+        padding-top: 0;
+      }
 
-button {
-     color: #fff;
-     background-color: #6abc3a;
-     padding: 15px 40px 15px 40px;
-     margin: 10px;
+      .bottom-nav .nav-item:nth-child(2) .icon {
+        font-size: 2.5rem;
+        line-height: 1;
+      }
+
+      .bottom-nav .nav-item:nth-child(2) .label {
+        /* NEW: Removed absolute positioning for contained text */
+        position: static;
+        width: auto;
+        text-align: center;
+        font-size: 0.65rem;
+        /* Slightly smaller to fit */
+        margin-top: 0;
+        color: white;
+      }
+
+      .bottom-nav .nav-item:nth-child(2):hover {
+        background-color: #34495e;
+      }
+    }
+
+    @media (max-width: 470px) {
+      .progress-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        flex-wrap: nowrap;
+        gap: 1rem;
+      }
+
+      .progress-bar-vertical {
+        height: 80px;
+      }
+    }
+
+    .progress-bar-vertical {
+      height: 80px;
+    }
+
+    .primary-icon {
+      filter: invert(61%) sepia(14%) saturate(1234%) hue-rotate(350deg) brightness(85%) contrast(89%);
+    }
+
+    .secondary-icon {
+      filter: invert(88%) sepia(4%) saturate(6809%) hue-rotate(166deg) brightness(102%) contrast(83%);
+    }
+
+    button {
+      color: #fff;
+      background-color: #6abc3a;
+      padding: 15px 40px 15px 40px;
+      margin: 10px;
       font-size: 14px;
-  font-family: "Press Start 2P", system-ui;
-     border: 0;
-     box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, 0px 10px #00000038, 5px 5px #00000038, -5px 5px #00000038, inset 0px 5px #ffffff36 ;
-     cursor: pointer;
-     width: 200px;
-     height: 45px;
-}
- button:active {
-     transform: translateY(5px);
-     box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black,inset 0px 5px #00000038;
-}
-    </style>
+      font-family: "Press Start 2P", system-ui;
+      border: 0;
+      box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, 0px 10px #00000038, 5px 5px #00000038, -5px 5px #00000038, inset 0px 5px #ffffff36;
+      cursor: pointer;
+      width: 200px;
+      height: 45px;
+    }
+
+    button:active {
+      transform: translateY(5px);
+      box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, inset 0px 5px #00000038;
+    }
+  </style>
 </head>
+
 <body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4 ">
 
-    <div id="game-container" class="bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center max-w-sm w-full">
-        <h1 class="text-3xl font-extrabold text-gray-800 mb-4">Coming Soon...</h1>
+  <div id="game-container" class="bg-white p-8 rounded-xl shadow-2xl flex flex-col items-center max-w-sm w-full">
+    <h1 class="text-3xl font-extrabold text-gray-800 mb-4">Coming Soon...</h1>
 
-    </div>
-    <nav class="bottom-nav">
-        <a href="games.html" class="nav-item">
-          <span class="icon"><img src="games.svg" width="50px" class="secondary-icon"></span>
-          <span class="label"></span>
-        </a>
-        <a href="index.html" class="nav-item">
-          <span class="icon"><img src="home.svg" width="50px" class="primary-icon"></span>
-          <span class="label"></span>
-        </a>
-        <a href="#" class="nav-item">
-          <span class="icon"><img src="settings.svg" width="50px" class="secondary-icon"></span>
-          <span class="label"></span>
-        </a>
-      </nav>
-    
+  </div>
+  <nav class="bottom-nav">
+    <a href="games.html" class="nav-item">
+      <span class="icon"><img src="games.svg" width="50px" class="secondary-icon"></span>
+      <span class="label"></span>
+    </a>
+    <a href="index.html" class="nav-item">
+      <span class="icon"><img src="home.svg" width="50px" class="primary-icon"></span>
+      <span class="label"></span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="icon"><img src="settings.svg" width="50px" class="secondary-icon"></span>
+      <span class="label"></span>
+    </a>
+  </nav>
+
 </body>
+
 </html>
