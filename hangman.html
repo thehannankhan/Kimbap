@@ -114,6 +114,9 @@
 
         /* Responsive layout for the game area */
         @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
             .game-area {
                 flex-direction: column;
                 align-items: center;
@@ -130,6 +133,22 @@
                 width: 180px;
                 height: 180px;
             }
+            
+            /* --- KEYBOARD RESPONSIVE FIXES --- */
+            .keyboard {
+                padding: 0 5px; /* Add slight padding to the sides */
+                gap: 4px; /* Reduced gap for smaller screens */
+            }
+            
+            .keyboard-button {
+                /* Calulate width to fit about 9-10 keys per line on mobile */
+                width: calc(100% / 9 - 4px); 
+                min-width: 32px; 
+                padding: 12px 0; /* Increased vertical padding for a better touch target (min 44px height) */
+                font-size: 0.8rem; 
+                line-height: 1; /* Keep text centered */
+            }
+            /* --------------------------------- */
 
             .bottom-nav {
                 display: flex;
@@ -415,7 +434,8 @@
                 const letter = String.fromCharCode(i);
                 const button = document.createElement('button');
                 button.textContent = letter;
-                button.classList.add('keyboard-button', 'px-3', 'py-2', 'text-base', 'font-semibold', 'bg-gray-100', 'text-gray-800', 'rounded', 'uppercase', 'w-10');
+                // Removed 'w-10' class to allow CSS to calculate fluid width
+                button.classList.add('keyboard-button', 'py-2', 'text-base', 'font-semibold', 'bg-gray-100', 'text-gray-800', 'rounded', 'uppercase');
                 button.id = `key-${letter}`;
                 button.addEventListener('click', () => handleGuess(letter));
                 keyboardEl.appendChild(button);
