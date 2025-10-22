@@ -19,7 +19,7 @@
             font-family: 'Tiny5', 'Inter', sans-serif;
             background-color: #f0f4f8;
             /* Light blue-gray background */
-            background-image: url(bgs/bg5.GIF);
+            background-image: url(bgs/bg7.GIF);
             background-repeat: no-repeat;
             background-size: 700px;
             margin-bottom: 200px;
@@ -27,17 +27,17 @@
 
         /* Removed width: 50%; and margin: auto; from H1 to allow better responsiveness and centering */
         h1 {
-            color: white;
+            color: #303030;
             text-align: center;
         }
 
         #message {
-            color: white;
+            color: #303030;
             margin: 10px;
         }
         
         #guess-counter {
-            color: #fca5a5; /* Light red for the counter */
+            color: #553bb2; /* Light red for the counter */
         }
         
         /* Removed custom width/margin on these elements, relying on flex/grid parent centering */
@@ -50,7 +50,7 @@
             letter-spacing: 1.25rem;
             /* Wide spacing for visibility */
             font-weight: 700;
-            color: #9fe7cf;
+            color: #2b503f;
             /* Emerald green */
             transition: color 0.3s;
         }
@@ -353,7 +353,7 @@
         // --- UI Functions ---
         function updateGuessCounter() {
             const remaining = maxMistakes - mistakes;
-            guessCounterEl.textContent = `Wrong Guesses: ${mistakes} / ${maxMistakes} (${remaining} remaining)`;
+            guessCounterEl.textContent = `Guesses: ${mistakes} / ${maxMistakes} (${remaining} remaining)`;
             
             // Optional: Add a visual cue when guesses are running low
             if (remaining <= 2 && remaining > 0) {
