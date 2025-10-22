@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drowned Woman</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Press+Start+2P&family=Squada+One&family=Tiny5&display=swap"
+        rel="stylesheet">
+
+    <!-- Load Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles to override or enhance Tailwind */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Tiny5', 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            /* Light blue-gray background */
+            background-image: url(bgs/bg5.GIF);
+            background-repeat: no-repeat;
+            background-size: 700px;
+            margin-bottom: 200px;
+        }
+
+        h1 {
+            color: white;
+        }
+
+        #message {
+            color: white;
+        }
+        .word-info {
+            margin: auto;
+        }
+
+        .word-display {
+            font-size: 2.5rem;
+            letter-spacing: 1.25rem;
+            /* Wide spacing for visibility */
+            font-weight: 700;
+            color: #9fe7cf;
+            /* Emerald green */
+            transition: color 0.3s;
+        }
+
+        .hangman-display {
+            margin: auto;
+        }
+
+        .keyboard-button {
+            transition: transform 0.1s, background-color 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .keyboard-button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+            background-color: #f3f4f6;
+        }
+
+        .keyboard-button:disabled {
+            cursor: not-allowed;
+            background-color: #e5e7eb !important;
+            color: #9ca3af !important;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Ensure the hangman image is prominent and contained */
+        #hangman-img {
+            width: 250px;
+            height: 250px;
+            object-fit: contain;
+            border: 2px solid #374151;
+            /* Dark border */
+            border-radius: 8px;
+            background-color: rgb(59 130 246 / 0.5);
+        }
+
+        #reset-button {
+            background-color: #d83434;
+            color: white;
+            font-family: "Press Start 2P";
+        }
+        button {
+            color: #fff;
+            background-color: #6abc3a;
+            padding: 15px 40px 15px 40px;
+            margin: 10px;
+            font-size: 14px;
+            font-family: "Press Start 2P", system-ui;
+            border: 0;
+            box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, 0px 10px #00000038, 5px 5px #00000038, -5px 5px #00000038, inset 0px 5px #ffffff36;
+            cursor: pointer;
+            width: 200px;
+            height: 45px;
+        }
+
+        button:active {
+            transform: translateY(5px);
+            box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, inset 0px 5px #00000038;
+        }
+
+
+        .primary-icon {
+            filter: invert(61%) sepia(14%) saturate(1234%) hue-rotate(350deg) brightness(85%) contrast(89%);
+        }
+
+        .secondary-icon {
+            filter: invert(88%) sepia(4%) saturate(6809%) hue-rotate(166deg) brightness(102%) contrast(83%);
+        }
+
+        /* Responsive layout for the game area */
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+
+            .word-display {
+                font-size: 1.8rem;
+                letter-spacing: 0.5rem;
+                margin: auto;
+            }
+
+            #hangman-img {
+                width: 180px;
+                height: 180px;
+            }
+
+            .bottom-nav {
+                display: flex;
+                /* Show for mobile */
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                /* UPDATED: Increased height to 70px */
+                height: 80px;
+                /* Set the background color */
+                background-color: #4a7a88;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+                z-index: 1000;
+                justify-content: space-around;
+                align-items: center;
+
+                /* MODIFIED: Changed margin to padding for empty space at the very bottom */
+                padding-bottom: 10px;
+            }
+
+            .nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                color: white;
+                /* Text color */
+                flex-grow: 1;
+                /* Retained flex-grow for side items */
+                height: 100%;
+                font-size: 0.75rem;
+                /* Smaller font for mobile labels */
+                transition: background-color 0.2s;
+                background-color: transparent;
+            }
+
+            .nav-item:hover {
+                background-color: #34495e;
+            }
+
+            .nav-item .icon {
+                font-size: 1.5rem;
+                line-height: 1;
+                /* Keep icon vertically centered */
+            }
+
+            .nav-item .label {
+                margin-top: 3px;
+                font-family: 'Pixelify Sans', sans-serif;
+            }
+
+            /* REVISED CSS for the perfect circle orb icon */
+            .bottom-nav .nav-item:nth-child(2) {
+                /* Selects the second nav-item (the middle one) */
+                position: relative;
+                /* Adjusted top to keep the orb visually centered on the bar (70px high + 10px pad) */
+                top: -20px;
+
+                /* UPDATED: Orb size */
+                width: 80px;
+                height: 80px;
+                border-radius: 15%;
+
+                /* Ensures same color as navbar */
+                background-color: #d9a56b;
+
+                box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
+
+                /* Overrides default nav-item flex properties to ensure fixed size */
+                flex-grow: 0;
+                flex-shrink: 0;
+                flex-basis: auto;
+
+                /* Margin adjustments to visually separate the side items from the orb */
+                margin-left: 15px;
+                margin-right: 15px;
+
+                /* Re-center content in the orb */
+                display: flex;
+                flex-direction: column;
+                /* NEW: Need column layout to stack icon and label */
+                align-items: center;
+                justify-content: center;
+                /* Center content vertically */
+                padding-top: 0;
+            }
+
+            .bottom-nav .nav-item:nth-child(2) .icon {
+                font-size: 2.5rem;
+                line-height: 1;
+            }
+
+            .bottom-nav .nav-item:nth-child(2) .label {
+                /* NEW: Removed absolute positioning for contained text */
+                position: static;
+                width: auto;
+                text-align: center;
+                font-size: 0.65rem;
+                /* Slightly smaller to fit */
+                margin-top: 0;
+                color: white;
+            }
+
+            .bottom-nav .nav-item:nth-child(2):hover {
+                background-color: #34495e;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class=" p-8 md:p-12 rounded-xl max-w-4xl w-full">
+        <h1 class="text-4xl font-bold text-800 mb-6 text-center">The Drowned Woman</h1>
+
+        <!-- Game Area -->
+        <div class="game-area flex justify-center items-start gap-10 mb-8 border-b pb-8">
+
+            <!-- Hangman Image Display -->
+            <div class="hangman-display flex-shrink-0">
+                <!-- IMPORTANT: Create an 'images' folder with 'step0.png' through 'step6.png' -->
+                <img id="hangman-img" src="images/step0.png" alt="Hangman Progression" />
+            </div>
+
+            <!-- Word and Message Area -->
+            <div class="word-info flex flex-col justify-center items-center mt-6">
+                <div id="word-display" class="word-display mb-4 text-center"></div>
+                <div id="message" class=" text-xl font-medium text-700 h-8 text-center"></div>
+            </div>
+        </div>
+
+        <!-- Keyboard Area -->
+        <div id="keyboard" class="keyboard flex flex-wrap justify-center gap-2 mb-8">
+            <!-- Buttons for A-Z will be generated by JavaScript -->
+        </div>
+
+        <!-- Reset Button -->
+        <div class="flex justify-center">
+            <button id="reset-button">
+                Restart
+            </button>
+        </div>
+        <br>
+        <br>
+        <br>
+        <br>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="games.html" class="nav-item">
+            <span class="icon"><img src="games.svg" width="50px" class="secondary-icon"></span>
+            <span class="label"></span>
+        </a>
+        <a href="index.html" class="nav-item">
+            <span class="icon"><img src="home.svg" width="50px" class="primary-icon"></span>
+            <span class="label"></span>
+        </a>
+        <a href="settings.html" class="nav-item">
+            <span class="icon"><img src="settings.svg" width="50px" class="secondary-icon"></span>
+            <span class="label"></span>
+        </a>
+    </nav>
+    <script>
+        // --- Game State Variables ---
+        // Add or remove words here to customize the game content
+        const words = [
+            "APPLE", "HOUSE", "WATER", "CHAIR", "TABLE", "PENCIL", "BUTTON", "WINDOW",
+            "RIVER", "STREET", "BOTTLE", "CLOUD", "MOUNTAIN", "GARDEN", "SHADOW", "BOOK",
+            "HAPPY", "FRIEND", "SUMMER", "WINTER", "OCEAN", "BRIDGE", "FLOWER", "GUITAR",
+            "CAMERA", "BASKET", "YELLOW", "PURPLE", "FAMILY", "SCHOOL", "MARKET", "JOURNAL",
+            "BLANKET", "CANDLE", "TRAFFIC", "SUBWAY", "DOCTOR", "PICTURE", "TRAVEL", "LUNCH",
+            "BREAKFAST", "DANCING", "SISTER", "BROTHER", "KITCHEN", "MIRROR", "ZEBRA", "ISLAND",
+            "COFFEE", "ELEPHANT"
+        ];
+        let selectedWord = '';
+        let guessedLetters = [];
+        let mistakes = 0;
+        const maxMistakes = 6; // Total image steps: 0 (start) to 6 (game over)
+
+        // --- DOM Elements ---
+        const wordDisplayEl = document.getElementById('word-display');
+        const hangmanImgEl = document.getElementById('hangman-img');
+        const keyboardEl = document.getElementById('keyboard');
+        const messageEl = document.getElementById('message');
+        const resetButton = document.getElementById('reset-button');
+
+        // --- Hangman Image Customization Setup ---
+        function updateHangmanImage() {
+            // This is the core customization point. 
+            // It dynamically updates the image path based on the 'mistakes' count.
+            hangmanImgEl.src = `images/step${mistakes}.png`;
+            // Add a simple error handler in case the image file isn't found
+            hangmanImgEl.onerror = () => {
+                console.error(`Image not found: images/step${mistakes}.png. Please check your image folder and file names.`);
+            };
+        }
+
+        // --- Game Logic Functions ---
+
+        function initializeGame() {
+            // 1. Reset state
+            const randomIndex = Math.floor(Math.random() * words.length);
+            selectedWord = words[randomIndex].toUpperCase(); // Ensure word is uppercase
+            guessedLetters = [];
+            mistakes = 0;
+            messageEl.textContent = 'Guess a letter to begin!';
+
+            // 2. Update display
+            updateWordDisplay();
+            updateHangmanImage();
+
+            // 3. Reset keyboard
+            keyboardEl.innerHTML = '';
+            createKeyboard();
+        }
+
+        function updateWordDisplay() {
+            const display = selectedWord.split('').map(letter => {
+                return guessedLetters.includes(letter) ? letter : '_';
+            }).join(' ');
+
+            wordDisplayEl.textContent = display;
+
+            // Check for win condition
+            if (!display.includes('_')) {
+                endGame(true);
+            }
+        }
+
+        function handleGuess(letter) {
+            // Disable the clicked button immediately
+            const button = document.getElementById(`key-${letter}`);
+            if (button) {
+                button.disabled = true;
+            } else {
+                return; // Guard clause
+            }
+
+            guessedLetters.push(letter);
+
+            if (selectedWord.includes(letter)) {
+                // Correct guess
+                messageEl.textContent = '🎉 That letter is correct!';
+                updateWordDisplay();
+            } else {
+                // Incorrect guess
+                mistakes++;
+                messageEl.textContent = '❌ Wrong guess! Try again.';
+                updateHangmanImage();
+
+                // Check for lose condition
+                if (mistakes >= maxMistakes) {
+                    endGame(false);
+                }
+            }
+        }
+
+        function endGame(isWin) {
+            // Disable all keyboard buttons
+            Array.from(keyboardEl.children).forEach(button => {
+                button.disabled = true;
+            });
+
+            if (isWin) {
+                messageEl.textContent = `🥳 YOU WON! The word was ${selectedWord}!`;
+                wordDisplayEl.classList.add('text-green-600');
+            } else {
+                messageEl.textContent = `💀 GAME OVER! The word was: ${selectedWord}`;
+                wordDisplayEl.classList.add('text-red-600');
+            }
+        }
+
+        // --- UI Functions ---
+
+        function createKeyboard() {
+            // Remove win/loss styling on reset
+            wordDisplayEl.classList.remove('text-green-600', 'text-red-600');
+
+            // ASCII codes for 'A' (65) to 'Z' (90)
+            for (let i = 65; i <= 90; i++) {
+                const letter = String.fromCharCode(i);
+                const button = document.createElement('button');
+                button.textContent = letter;
+                button.classList.add('keyboard-button', 'px-3', 'py-2', 'text-base', 'font-semibold', 'bg-gray-100', 'text-gray-800', 'rounded', 'uppercase', 'w-10');
+                button.id = `key-${letter}`;
+                button.addEventListener('click', () => handleGuess(letter));
+                keyboardEl.appendChild(button);
+            }
+        }
+
+        // --- Event Listeners ---
+        resetButton.addEventListener('click', initializeGame);
+
+        // Start the game when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', initializeGame);
+    </script>
+</body>
+
+</html>
