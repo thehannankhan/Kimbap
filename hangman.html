@@ -45,7 +45,7 @@
             width: 100%; /* Ensure they take full available width in their container */
         }
         .hangman-display {
-            width: 50%;
+            margin: auto;
         }
 
         .word-display {
@@ -309,8 +309,7 @@
 
             <!-- Hangman Image Display -->
             <!-- Added flex justify-center to center the image on small screens -->
-            <div class="hangman-display flex-shrink-0 flex justify-center w-full md:w-auto">
-                <!-- IMPORTANT: Create an 'images' folder with 'step0.png' through 'step6.png' -->
+            <div class="hangman-display flex-shrink-0 flex md:w-auto">
                 <img id="hangman-img" src="images/step0.png" alt="Hangman Progression" />
             </div>
 
