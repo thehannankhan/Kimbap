@@ -33,7 +33,7 @@
 
         #message {
             color: #303030;
-            margin: 10px;
+            margin: auto;
             width: 50%;
             text-align: center;
 
@@ -402,7 +402,7 @@
         // --- UI Functions ---
         function updateGuessCounter() {
             const remaining = maxMistakes - mistakes;
-            guessCounterEl.textContent = `Wrong Guesses: ${mistakes} / ${maxMistakes} (${remaining} remaining)`;
+            guessCounterEl.textContent = `Wrong Guesses: ${mistakes} / ${maxMistakes} \n(${remaining} remaining)`;
             
             // Optional: Add a visual cue when guesses are running low
             if (remaining <= 2 && remaining > 0) {
