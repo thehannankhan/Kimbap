@@ -1,20 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mahjong Tile Memory Match</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Press+Start+2P&family=Squada+One&family=Tiny5&display=swap"
+        rel="stylesheet">
     <style>
         /* Global Styles */
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Pixelify Sans', 'Inter', sans-serif;
             background-color: #212121;
             color: #fff;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px 10px; /* Reduced side padding slightly */
+            padding: 20px 10px;
+            /* Reduced side padding slightly */
             min-height: 100vh;
             margin: 0;
             user-select: none;
@@ -36,7 +41,8 @@
         }
 
         h1 {
-            font-size: 1.8rem; /* Slightly reduced base font size */
+            font-size: 1.25rem;
+            /* Slightly reduced base font size */
             margin: 0;
             color: #f0f0f0;
             text-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
@@ -69,7 +75,8 @@
             font-size: 1rem;
             font-weight: bold;
             display: flex;
-            flex-direction: row; /* Inline on all devices for this revision */
+            flex-direction: row;
+            /* Inline on all devices for this revision */
             align-items: center;
             gap: 5px;
         }
@@ -82,8 +89,8 @@
 
         /* Button Styling */
         .btn {
-            background-color: #00bfff;
-            color: white;
+            background-color: #ffe100;
+            color: #303030;
             border: none;
             padding: 10px 15px;
             border-radius: 6px;
@@ -91,7 +98,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 3px #0099cc;
-            white-space: nowrap; /* Prevent button text wrap */
+            white-space: nowrap;
+            /* Prevent button text wrap */
         }
 
         .btn:hover {
@@ -109,15 +117,17 @@
             cursor: not-allowed;
             transform: none;
         }
-        
+
         /* Reset button style */
         .btn.reset {
             background-color: #f44336;
             box-shadow: 0 3px #D32F2F;
         }
+
         .btn.reset:hover {
             background-color: #D32F2F;
         }
+
         .btn.reset:active {
             box-shadow: 0 1px #B71C1C;
         }
@@ -125,11 +135,14 @@
         /* Game Board (6x4 Grid) */
         .game-board {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 4 columns for 6x4 layout */
-            gap: 5px; /* Reduced gap to save space */
+            grid-template-columns: repeat(4, 1fr);
+            /* 4 columns for 6x4 layout */
+            gap: 5px;
+            /* Reduced gap to save space */
             perspective: 1000px;
             width: 100%;
-            padding: 5px; /* Reduced padding */
+            padding: 5px;
+            /* Reduced padding */
             background-color: #444;
             border-radius: 10px;
             box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
@@ -139,19 +152,22 @@
         .card {
             height: 0;
             /* Card height set to 100% of its width to maximize vertical space */
-            padding-bottom: 100%; 
+            padding-bottom: 100%;
             position: relative;
             cursor: pointer;
             transform-style: preserve-3d;
             transition: transform 0.5s;
-            border-radius: 4px; /* Slightly smaller border radius */
+            border-radius: 4px;
+            /* Slightly smaller border radius */
 
             /* Increased beige border for depth */
             /* #b09c85 is a beige/ivory color for the tile sides */
-            box-shadow: 
-                4px 4px 0 rgba(0, 0, 0, 0.2), 
-                0 8px 0 #b09c85, /* Thicker bottom edge */
-                8px 0 0 #b09c85; /* Thicker right edge */
+            box-shadow:
+                4px 4px 0 rgba(0, 0, 0, 0.2),
+                0 8px 0 #b09c85,
+                /* Thicker bottom edge */
+                8px 0 0 #b09c85;
+            /* Thicker right edge */
         }
 
         .card.locked {
@@ -161,14 +177,15 @@
         .card.is-flipped {
             transform: rotateY(180deg);
             /* Adjust shadow when flipped */
-            box-shadow: 
+            box-shadow:
                 2px 2px 0 rgba(0, 0, 0, 0.2),
                 0 4px 0 #b09c85,
                 4px 0 0 #b09c85;
         }
 
         /* Card Faces */
-        .card-face, .card-back {
+        .card-face,
+        .card-back {
             position: absolute;
             width: 100%;
             height: 100%;
@@ -177,20 +194,23 @@
             align-items: center;
             justify-content: center;
             border-radius: 4px;
-            border: 1px solid rgba(255, 255, 255, 0.5); /* Thinner border */
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            /* Thinner border */
             overflow: hidden;
             box-sizing: border-box;
         }
 
         .card-back {
-            background-color: #2e8b57; /* Deep Sea Green (Mahjong Back) */
+            background-color: #2e8b57;
+            /* Deep Sea Green (Mahjong Back) */
             transform: rotateY(0deg);
-            background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-image: radial-gradient(circle, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
             background-size: 8px 8px;
         }
 
         .card-face {
-            background-color: #ffffff; /* Classic white face */
+            background-color: #ffffff;
+            /* Classic white face */
             transform: rotateY(180deg);
             padding: 5%;
         }
@@ -210,9 +230,17 @@
         }
 
         @keyframes match-pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.03);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         /* Overlay Styles */
@@ -234,9 +262,8 @@
         .message-box {
             background-color: #333;
             color: #fff;
-            padding: 30px;
+            padding: 20px;
             border-radius: 10px;
-            border: 4px solid #ffcc00;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
             max-width: 90%;
         }
@@ -252,27 +279,53 @@
             margin-bottom: 25px;
         }
 
+
+        button {
+            color: #fff;
+            background-color: #6abc3a;
+            padding: 15px 40px 15px 40px;
+            margin: 10px;
+            font-size: 14px;
+            font-family: "Press Start 2P", system-ui;
+            border: 0;
+            box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, 0px 10px #00000038, 5px 5px #00000038, -5px 5px #00000038, inset 0px 5px #ffffff36;
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: translateY(5px);
+            box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, inset 0px 5px #00000038;
+        }
+
         /* Responsive Adjustments (Mobile Optimization) */
         @media (max-width: 768px) {
             h1 {
-                font-size: 1.5rem; /* Shrink title even more on small phones */
+                font-size: 1.5rem;
+                /* Shrink title even more on small phones */
             }
+
             .btn {
                 font-size: 0.9rem;
                 padding: 8px 10px;
             }
+
             .stats {
                 padding: 8px;
             }
+
             .stat-item {
                 font-size: 0.8rem;
             }
+
             .stat-value {
                 font-size: 1.1rem;
             }
+
             .game-board {
-                gap: 4px; /* Tighter grid */
+                gap: 4px;
+                /* Tighter grid */
             }
+
             .bottom-nav {
                 display: flex;
                 /* Show for mobile */
@@ -288,10 +341,9 @@
                 z-index: 1000;
                 justify-content: space-around;
                 align-items: center;
-                border-top: 5px solid #2e505a;
 
                 /* MODIFIED: Changed margin to padding for empty space at the very bottom */
-                padding-bottom: 20px;
+                padding-bottom: 10px;
             }
 
             .nav-item {
@@ -334,10 +386,9 @@
                 top: -20px;
 
                 /* UPDATED: Orb size */
-                width: 70px;
-                height: 70px;
-                border-radius: 0%;
-                border: 5px solid #3a3a3a;
+                width: 80px;
+                height: 80px;
+                border-radius: 15%;
 
                 /* Ensures same color as navbar */
                 background-color: #d9a56b;
@@ -385,17 +436,18 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
         <div class="header-controls">
-            <h1>Mahjong Tile Match</h1>
-            <button id="startGameBtn" class="btn">Start Game</button>
+            <h1>Welcome to Manly Bakery</h1>
+            <button id="startGameBtn" class="btn">Start</button>
         </div>
 
         <div class="stats">
             <div class="stat-item">
-                Time Left:
+                Time:
                 <span id="timer" class="stat-value">60s</span>
             </div>
             <div class="stat-item">
@@ -442,18 +494,18 @@
         // 12 unique placeholder URLs for 12 pairs (24 cards total).
         // REPLACE THESE PLACEHOLDERS WITH YOUR 12 UNIQUE GIF/IMAGE URLs.
         const EMOJIS = [
-            'https://placehold.co/100x100/ff7f50/fff?text=GIF-1',
-            'https://placehold.co/100x100/6495ed/fff?text=GIF-2',
-            'https://placehold.co/100x100/7fffd4/000?text=GIF-3',
-            'https://placehold.co/100x100/f08080/fff?text=GIF-4',
-            'https://placehold.co/100x100/da70d6/fff?text=GIF-5',
-            'https://placehold.co/100x100/ffa500/000?text=GIF-6',
-            'https://placehold.co/100x100/3cb371/fff?text=GIF-7',
-            'https://placehold.co/100x100/4682b4/fff?text=GIF-8',
-            'https://placehold.co/100x100/bdb76b/000?text=GIF-9',
-            'https://placehold.co/100x100/ff69b4/fff?text=GIF-10',
-            'https://placehold.co/100x100/87cefa/000?text=GIF-11',
-            'https://placehold.co/100x100/adff2f/000?text=GIF-12'
+            'images/pastry01.png',
+            'images/pastry02.png',
+            'images/pastry03.png',
+            'images/pastry04.png',
+            'images/pastry05.png',
+            'images/pastry06.png',
+            'images/pastry07.png',
+            'images/pastry08.png',
+            'images/pastry09.png',
+            'images/pastry10.png',
+            'images/pastry11.png',
+            'images/pastry12.png'
         ];
 
         const GRID_ROWS = 6;
@@ -617,7 +669,7 @@
             }
 
             messageOverlay.style.display = 'flex';
-            startGameBtn.textContent = 'Start Game'; // Ensure button resets
+            startGameBtn.textContent = 'Start'; // Ensure button resets
             startGameBtn.classList.remove('reset');
             startGameBtn.disabled = false;
         }
@@ -645,7 +697,7 @@
             renderBoard();
 
             // Setup initial button state
-            startGameBtn.textContent = 'Start Game';
+            startGameBtn.textContent = 'Start';
             startGameBtn.classList.remove('reset');
             startGameBtn.disabled = false;
         }
@@ -654,7 +706,7 @@
             if (gameActive) return;
 
             gameActive = true;
-            startGameBtn.textContent = 'Reset Game'; // Button changes to Reset
+            startGameBtn.textContent = 'Reset'; // Button changes to Reset
             startGameBtn.classList.add('reset');
             startGameBtn.disabled = true; // Disabled during sneak peek
 
@@ -689,4 +741,5 @@
         window.onload = resetGame;
     </script>
 </body>
+
 </html>
