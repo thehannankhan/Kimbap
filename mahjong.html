@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahjong Tile Memory Match</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #212121;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px; /* Reduced side padding slightly */
+            min-height: 100vh;
+            margin: 0;
+            user-select: none;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        /* Header Controls for Inline Title and Button */
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.8rem; /* Slightly reduced base font size */
+            margin: 0;
+            color: #f0f0f0;
+            text-shadow: 0 3px 5px rgba(0, 0, 0, 0.3);
+            text-align: left;
+            flex-grow: 1;
+            padding-right: 10px;
+        }
+
+        .primary-icon {
+            filter: invert(61%) sepia(14%) saturate(1234%) hue-rotate(350deg) brightness(85%) contrast(89%);
+        }
+
+        .secondary-icon {
+            filter: invert(88%) sepia(4%) saturate(6809%) hue-rotate(166deg) brightness(102%) contrast(83%);
+        }
+
+        /* Stats Bar */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            width: 100%;
+        }
+
+        .stat-item {
+            font-size: 1rem;
+            font-weight: bold;
+            display: flex;
+            flex-direction: row; /* Inline on all devices for this revision */
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            color: #ffcc00;
+            margin-top: 0;
+        }
+
+        /* Button Styling */
+        .btn {
+            background-color: #00bfff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px #0099cc;
+            white-space: nowrap; /* Prevent button text wrap */
+        }
+
+        .btn:hover {
+            background-color: #0099cc;
+        }
+
+        .btn:active {
+            box-shadow: 0 1px #007799;
+            transform: translateY(2px);
+        }
+
+        .btn:disabled {
+            background-color: #666;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Reset button style */
+        .btn.reset {
+            background-color: #f44336;
+            box-shadow: 0 3px #D32F2F;
+        }
+        .btn.reset:hover {
+            background-color: #D32F2F;
+        }
+        .btn.reset:active {
+            box-shadow: 0 1px #B71C1C;
+        }
+
+        /* Game Board (6x4 Grid) */
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 4 columns for 6x4 layout */
+            gap: 5px; /* Reduced gap to save space */
+            perspective: 1000px;
+            width: 100%;
+            padding: 5px; /* Reduced padding */
+            background-color: #444;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Card Styling - Mahjong Tile Shape (Smaller and more square) */
+        .card {
+            height: 0;
+            /* Card height set to 100% of its width to maximize vertical space */
+            padding-bottom: 100%; 
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+            border-radius: 4px; /* Slightly smaller border radius */
+
+            /* Increased beige border for depth */
+            /* #b09c85 is a beige/ivory color for the tile sides */
+            box-shadow: 
+                4px 4px 0 rgba(0, 0, 0, 0.2), 
+                0 8px 0 #b09c85, /* Thicker bottom edge */
+                8px 0 0 #b09c85; /* Thicker right edge */
+        }
+
+        .card.locked {
+            pointer-events: none;
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+            /* Adjust shadow when flipped */
+            box-shadow: 
+                2px 2px 0 rgba(0, 0, 0, 0.2),
+                0 4px 0 #b09c85,
+                4px 0 0 #b09c85;
+        }
+
+        /* Card Faces */
+        .card-face, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.5); /* Thinner border */
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .card-back {
+            background-color: #2e8b57; /* Deep Sea Green (Mahjong Back) */
+            transform: rotateY(0deg);
+            background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 8px 8px;
+        }
+
+        .card-face {
+            background-color: #ffffff; /* Classic white face */
+            transform: rotateY(180deg);
+            padding: 5%;
+        }
+
+        /* Card Image/GIF */
+        .card-face img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Matched state */
+        .card.matched .card-face {
+            background-color: #e6ffe6;
+            opacity: 0.9;
+            animation: match-pulse 0.5s;
+        }
+
+        @keyframes match-pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
+        }
+
+        /* Overlay Styles */
+        .message-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+            text-align: center;
+        }
+
+        .message-box {
+            background-color: #333;
+            color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            border: 4px solid #ffcc00;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.6);
+            max-width: 90%;
+        }
+
+        .message-box h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #ffcc00;
+        }
+
+        .message-box p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+
+        /* Responsive Adjustments (Mobile Optimization) */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.5rem; /* Shrink title even more on small phones */
+            }
+            .btn {
+                font-size: 0.9rem;
+                padding: 8px 10px;
+            }
+            .stats {
+                padding: 8px;
+            }
+            .stat-item {
+                font-size: 0.8rem;
+            }
+            .stat-value {
+                font-size: 1.1rem;
+            }
+            .game-board {
+                gap: 4px; /* Tighter grid */
+            }
+            .bottom-nav {
+                display: flex;
+                /* Show for mobile */
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                /* UPDATED: Increased height to 70px */
+                height: 80px;
+                /* Set the background color */
+                background-color: #4a7a88;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+                z-index: 1000;
+                justify-content: space-around;
+                align-items: center;
+                border-top: 5px solid #2e505a;
+
+                /* MODIFIED: Changed margin to padding for empty space at the very bottom */
+                padding-bottom: 20px;
+            }
+
+            .nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                color: white;
+                /* Text color */
+                flex-grow: 1;
+                /* Retained flex-grow for side items */
+                height: 100%;
+                font-size: 0.75rem;
+                /* Smaller font for mobile labels */
+                transition: background-color 0.2s;
+                background-color: transparent;
+            }
+
+            .nav-item:hover {
+                background-color: #34495e;
+            }
+
+            .nav-item .icon {
+                font-size: 1.5rem;
+                line-height: 1;
+                /* Keep icon vertically centered */
+            }
+
+            .nav-item .label {
+                margin-top: 3px;
+                font-family: 'Pixelify Sans', sans-serif;
+            }
+
+            /* REVISED CSS for the perfect circle orb icon */
+            .bottom-nav .nav-item:nth-child(2) {
+                /* Selects the second nav-item (the middle one) */
+                position: relative;
+                /* Adjusted top to keep the orb visually centered on the bar (70px high + 10px pad) */
+                top: -20px;
+
+                /* UPDATED: Orb size */
+                width: 70px;
+                height: 70px;
+                border-radius: 0%;
+                border: 5px solid #3a3a3a;
+
+                /* Ensures same color as navbar */
+                background-color: #d9a56b;
+
+                box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
+
+                /* Overrides default nav-item flex properties to ensure fixed size */
+                flex-grow: 0;
+                flex-shrink: 0;
+                flex-basis: auto;
+
+                /* Margin adjustments to visually separate the side items from the orb */
+                margin-left: 15px;
+                margin-right: 15px;
+
+                /* Re-center content in the orb */
+                display: flex;
+                flex-direction: column;
+                /* NEW: Need column layout to stack icon and label */
+                align-items: center;
+                justify-content: center;
+                /* Center content vertically */
+                padding-top: 0;
+            }
+
+            .bottom-nav .nav-item:nth-child(2) .icon {
+                font-size: 2.5rem;
+                line-height: 1;
+            }
+
+            .bottom-nav .nav-item:nth-child(2) .label {
+                /* NEW: Removed absolute positioning for contained text */
+                position: static;
+                width: auto;
+                text-align: center;
+                font-size: 0.65rem;
+                /* Slightly smaller to fit */
+                margin-top: 0;
+                color: white;
+            }
+
+            .bottom-nav .nav-item:nth-child(2):hover {
+                background-color: #34495e;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-controls">
+            <h1>Mahjong Tile Match</h1>
+            <button id="startGameBtn" class="btn">Start Game</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                Time Left:
+                <span id="timer" class="stat-value">60s</span>
+            </div>
+            <div class="stat-item">
+                Flips:
+                <span id="flips" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+                Matches:
+                <span id="matches" class="stat-value">0 / 12</span>
+            </div>
+        </div>
+
+        <div id="gameBoard" class="game-board">
+            <!-- Cards will be injected here by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Message Overlay -->
+    <div id="messageOverlay" class="message-overlay">
+        <div id="messageBox" class="message-box">
+            <h2 id="messageTitle"></h2>
+            <p id="messageText"></p>
+            <button id="restartBtn" class="btn">Play Again</button>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="games.html" class="nav-item">
+            <span class="icon"><img src="games.svg" width="50px" class="secondary-icon"></span>
+            <span class="label"></span>
+        </a>
+        <a href="index.html" class="nav-item">
+            <span class="icon"><img src="home.svg" width="50px" class="primary-icon"></span>
+            <span class="label"></span>
+        </a>
+        <a href="settings.html" class="nav-item">
+            <span class="icon"><img src="settings.svg" width="50px" class="secondary-icon"></span>
+            <span class="label"></span>
+        </a>
+    </nav>
+
+    <script>
+        // --- Core Game Setup ---
+        // 12 unique placeholder URLs for 12 pairs (24 cards total).
+        // REPLACE THESE PLACEHOLDERS WITH YOUR 12 UNIQUE GIF/IMAGE URLs.
+        const EMOJIS = [
+            'https://placehold.co/100x100/ff7f50/fff?text=GIF-1',
+            'https://placehold.co/100x100/6495ed/fff?text=GIF-2',
+            'https://placehold.co/100x100/7fffd4/000?text=GIF-3',
+            'https://placehold.co/100x100/f08080/fff?text=GIF-4',
+            'https://placehold.co/100x100/da70d6/fff?text=GIF-5',
+            'https://placehold.co/100x100/ffa500/000?text=GIF-6',
+            'https://placehold.co/100x100/3cb371/fff?text=GIF-7',
+            'https://placehold.co/100x100/4682b4/fff?text=GIF-8',
+            'https://placehold.co/100x100/bdb76b/000?text=GIF-9',
+            'https://placehold.co/100x100/ff69b4/fff?text=GIF-10',
+            'https://placehold.co/100x100/87cefa/000?text=GIF-11',
+            'https://placehold.co/100x100/adff2f/000?text=GIF-12'
+        ];
+
+        const GRID_ROWS = 6;
+        const GRID_COLS = 4;
+        const TOTAL_PAIRS = EMOJIS.length;
+        const TOTAL_CARDS = GRID_ROWS * GRID_COLS;
+        const GAME_TIME = 60; // 60 seconds
+
+        const gameBoard = document.getElementById('gameBoard');
+        const startGameBtn = document.getElementById('startGameBtn');
+        const timerDisplay = document.getElementById('timer');
+        const flipsDisplay = document.getElementById('flips');
+        const matchesDisplay = document.getElementById('matches');
+        const messageOverlay = document.getElementById('messageOverlay');
+        const messageTitle = document.getElementById('messageTitle');
+        const messageText = document.getElementById('messageText');
+        const restartBtn = document.getElementById('restartBtn');
+
+        let cardValues = [];
+        let flippedCards = [];
+        let matchesFound = 0;
+        let totalFlips = 0;
+        let gameTimer;
+        let timeLeft = GAME_TIME;
+        let gameActive = false;
+        let lockBoard = false;
+
+        // --- Utility Functions ---
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Uses <img> tag for GIF/Image content
+        function createCard(url) {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.value = url;
+            card.innerHTML = `
+                <div class="card-back"></div>
+                <div class="card-face">
+                    <img
+                        src="${url}"
+                        alt="Card Image"
+                        onerror="this.src='https://placehold.co/100x100/f00/fff?text=ERR'; this.style.maxWidth='80%'; this.style.maxHeight='80%'; this.style.opacity='0.5';"
+                    >
+                </div>
+            `;
+            card.addEventListener('click', flipCard);
+            return card;
+        }
+
+        function initializeCardValues() {
+            // Create 12 pairs (24 cards)
+            cardValues = [...EMOJIS, ...EMOJIS];
+            shuffle(cardValues);
+        }
+
+        function renderBoard() {
+            gameBoard.innerHTML = '';
+            cardValues.forEach(url => {
+                gameBoard.appendChild(createCard(url));
+            });
+        }
+
+        // --- Game Logic ---
+
+        function startTimer() {
+            timerDisplay.textContent = `${GAME_TIME}s`;
+            timeLeft = GAME_TIME;
+
+            clearInterval(gameTimer);
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `${timeLeft}s`;
+
+                if (timeLeft <= 10) {
+                    timerDisplay.style.color = '#ff4444';
+                } else {
+                    timerDisplay.style.color = '#ffcc00';
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    endGame(false);
+                }
+            }, 1000);
+        }
+
+        function updateStats() {
+            flipsDisplay.textContent = totalFlips;
+            matchesDisplay.textContent = `${matchesFound} / ${TOTAL_PAIRS}`;
+        }
+
+        function flipCard() {
+            if (!gameActive || lockBoard || this.classList.contains('is-flipped') || this.classList.contains('matched')) {
+                return;
+            }
+
+            this.classList.add('is-flipped');
+            flippedCards.push(this);
+
+            if (flippedCards.length === 2) {
+                totalFlips++;
+                updateStats();
+                lockBoard = true;
+                checkForMatch();
+            }
+        }
+
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            const isMatch = card1.dataset.value === card2.dataset.value;
+
+            if (isMatch) {
+                // Match
+                card1.classList.add('matched', 'locked');
+                card2.classList.add('matched', 'locked');
+                matchesFound++;
+                updateStats();
+                resetFlippedCards();
+                if (matchesFound === TOTAL_PAIRS) {
+                    endGame(true);
+                }
+            } else {
+                // Mismatch, flip back
+                setTimeout(() => {
+                    card1.classList.remove('is-flipped');
+                    card2.classList.remove('is-flipped');
+                    resetFlippedCards();
+                }, 800);
+            }
+        }
+
+        function resetFlippedCards() {
+            [flippedCards, lockBoard] = [[], false];
+        }
+
+        function endGame(isWin) {
+            gameActive = false;
+            clearInterval(gameTimer);
+
+            if (isWin) {
+                const finalTime = GAME_TIME - timeLeft;
+                messageTitle.textContent = "🏆 VICTORY! 🏆";
+                messageText.innerHTML = `Awesome! You cleared the board in ${totalFlips} flips with ${finalTime} seconds on the clock.`;
+                restartBtn.style.backgroundColor = '#4CAF50';
+                restartBtn.style.boxShadow = '0 3px #388E3C';
+            } else {
+                messageTitle.textContent = "⏱️ GAME OVER ⏱️";
+                messageText.innerHTML = `Time ran out! You matched ${matchesFound} out of ${TOTAL_PAIRS} pairs. Try again!`;
+                restartBtn.style.backgroundColor = '#f44336';
+                restartBtn.style.boxShadow = '0 3px #D32F2F';
+            }
+
+            messageOverlay.style.display = 'flex';
+            startGameBtn.textContent = 'Start Game'; // Ensure button resets
+            startGameBtn.classList.remove('reset');
+            startGameBtn.disabled = false;
+        }
+
+        function resetGame() {
+            // Stop game logic
+            clearInterval(gameTimer);
+
+            // Reset all state variables
+            flippedCards = [];
+            matchesFound = 0;
+            totalFlips = 0;
+            timeLeft = GAME_TIME;
+            gameActive = false;
+            lockBoard = false;
+
+            // Reset UI
+            timerDisplay.textContent = `${GAME_TIME}s`;
+            timerDisplay.style.color = '#ffcc00';
+            updateStats();
+            messageOverlay.style.display = 'none';
+
+            // Re-initialize and render
+            initializeCardValues();
+            renderBoard();
+
+            // Setup initial button state
+            startGameBtn.textContent = 'Start Game';
+            startGameBtn.classList.remove('reset');
+            startGameBtn.disabled = false;
+        }
+
+        function startGame() {
+            if (gameActive) return;
+
+            gameActive = true;
+            startGameBtn.textContent = 'Reset Game'; // Button changes to Reset
+            startGameBtn.classList.add('reset');
+            startGameBtn.disabled = true; // Disabled during sneak peek
+
+            // Flip all cards briefly for a sneak peek
+            const allCards = gameBoard.querySelectorAll('.card');
+            allCards.forEach(card => card.classList.add('is-flipped', 'locked'));
+
+            setTimeout(() => {
+                allCards.forEach(card => card.classList.remove('is-flipped', 'locked'));
+                startGameBtn.disabled = false; // Enable button after sneak peek
+                startTimer();
+            }, 3000); // 3 second sneak peek
+        }
+
+        // --- Event Listener for Start/Reset Button ---
+        startGameBtn.addEventListener('click', () => {
+            if (gameActive) {
+                // If game is active, clicking the button performs a reset
+                // Note: Using window.confirm() in the absence of a custom modal.
+                if (window.confirm("Are you sure you want to reset the current game?")) {
+                    resetGame();
+                }
+            } else {
+                // If game is inactive, clicking the button starts the game
+                startGame();
+            }
+        });
+
+        restartBtn.addEventListener('click', resetGame);
+
+        // --- Initialization ---
+        window.onload = resetGame;
+    </script>
+</body>
+</html>
