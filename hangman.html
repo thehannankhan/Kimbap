@@ -37,7 +37,7 @@
         }
         
         #guess-counter {
-            color: #553bb2; /* Light red for the counter */
+            color: #553bb2; /* Guess counter color */
         }
         
         /* Removed custom width/margin on these elements, relying on flex/grid parent centering */
@@ -47,11 +47,10 @@
 
         .word-display {
             font-size: 2.5rem;
-            letter-spacing: 1.25rem;
-            /* Wide spacing for visibility */
+            letter-spacing: 0.75rem; /* Adjusted for better readability */
             font-weight: 700;
             color: #2b503f;
-            /* Emerald green */
+            /* Dark green */
             transition: color 0.3s;
         }
 
@@ -78,6 +77,7 @@
             justify-content: center;
         }
         
+        /* Styles for the large Restart button */
         button {
             color: grey;
             background-color: white;
@@ -96,6 +96,46 @@
             transform: translateY(5px);
             box-shadow: 0px 5px black, 0px -5px black, 5px 0px black, -5px 0px black, inset 0px 5px #00000038;
         }
+
+        /* --- KEYBOARD BUTTON STYLES --- */
+        .keyboard-button {
+            background-color: #fff;
+            color: #303030;
+            font-family: 'Press Start 2P', system-ui;
+            border: 2px solid #303030;
+            box-shadow: 3px 3px 0 #303030;
+            transition: all 0.1s;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 12px 0;
+            /* Default width for desktop */
+            width: 45px;
+            border-radius: 4px;
+        }
+
+        .keyboard-button:hover:not(:disabled) {
+            background-color: #f0f0f0;
+            box-shadow: 2px 2px 0 #303030;
+        }
+        
+        .keyboard-button:active:not(:disabled) {
+            transform: translate(3px, 3px);
+            box-shadow: none;
+        }
+
+        .keyboard-button:disabled {
+            /* Greyed out style for used letters */
+            background-color: #7d7d7d; /* Medium grey background */
+            color: #b0b0b0; /* Light grey text */
+            box-shadow: none;
+            border-color: #7d7d7d;
+            cursor: default;
+            opacity: 1;
+            transform: none;
+        }
+        /* --- END KEYBOARD BUTTON STYLES --- */
 
 
         .primary-icon {
@@ -119,7 +159,7 @@
 
             .word-display {
                 font-size: 1.8rem;
-                letter-spacing: 0.15rem;
+                letter-spacing: 0.25rem; /* Reduced for mobile */
                 margin: auto;
             }
 
@@ -138,10 +178,11 @@
             .keyboard-button {
                 /* Calulate width to fit about 9-10 keys per line on mobile */
                 width: calc(100% / 9 - 4px); 
-                min-width: 32px; 
-                padding: 12px 0; /* Increased vertical padding for a better touch target (min 44px height) */
-                font-size: 0.8rem; 
-                line-height: 1; /* Keep text centered */
+                min-width: 30px; 
+                padding: 10px 0; /* Adjusted vertical padding */
+                font-size: 0.7rem; /* Smaller font on mobile */
+                border: 1px solid #303030; /* Thinner border on mobile */
+                box-shadow: 1px 1px 0 #303030;
             }
             /* --------------------------------- */
 
@@ -353,7 +394,7 @@
         // --- UI Functions ---
         function updateGuessCounter() {
             const remaining = maxMistakes - mistakes;
-            guessCounterEl.textContent = `Guesses: ${mistakes} / ${maxMistakes} (${remaining} remaining)`;
+            guessCounterEl.textContent = `Wrong Guesses: ${mistakes} / ${maxMistakes} (${remaining} remaining)`;
             
             // Optional: Add a visual cue when guesses are running low
             if (remaining <= 2 && remaining > 0) {
@@ -400,6 +441,7 @@
             // Disable the clicked button immediately
             const button = document.getElementById(`key-${letter}`);
             if (button) {
+                // Disabling the button triggers the new :disabled CSS style
                 button.disabled = true;
             } else {
                 return; // Guard clause
@@ -453,8 +495,8 @@
                 const letter = String.fromCharCode(i);
                 const button = document.createElement('button');
                 button.textContent = letter;
-                // Removed 'w-10' class to allow CSS to calculate fluid width
-                button.classList.add('keyboard-button', 'py-2', 'text-base', 'font-semibold', 'bg-gray-100', 'text-gray-800', 'rounded', 'uppercase');
+                // Use the custom CSS class 'keyboard-button' for all styling
+                button.classList.add('keyboard-button'); 
                 button.id = `key-${letter}`;
                 button.addEventListener('click', () => handleGuess(letter));
                 keyboardEl.appendChild(button);
