@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Affirmation Checklist</title>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .title-container {
+            padding-left: 5px;
+        }
+
+        .title-container h1 {
+            color: #4CAF50; /* A pleasant green */
+            margin: 0;
+            font-size: 2.2em;
+        }
+
+        #affirmation-subtitle {
+            font-style: italic;
+            color: #555;
+            margin: 5px 0 0 0;
+            font-size: 1.1em;
+            transition: color 0.5s; /* Smooth color transition for effect */
+        }
+
+        .image-container #dynamic-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%; /* Make the image round */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease-out; /* Add a subtle effect on change */
+        }
+
+        .checklist-container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        #task-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #task-list li {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.3s;
+        }
+
+        #task-list li:last-child {
+            border-bottom: none;
+        }
+
+        .checkbox-label {
+            flex-grow: 1;
+            margin-left: 15px;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            /* Hide default checkbox */
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        /* Custom Checkbox Style */
+        .checkbox-label::before {
+            content: '';
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #4CAF50;
+            border-radius: 4px;
+            margin-right: 15px;
+            vertical-align: middle;
+            transition: background-color 0.3s, border-color 0.3s;
+            transform: translate(0, -2px);
+        }
+
+        /* Checked state - change custom box color and add a checkmark */
+        input[type="checkbox"]:checked + .checkbox-label::before {
+            background-color: #4CAF50;
+            border-color: #4CAF50;
+            content: '✓';
+            color: white;
+            text-align: center;
+            line-height: 18px;
+            font-size: 14px;
+        }
+        
+        .completed .checkbox-label {
+            text-decoration: line-through;
+            color: #a0a0a0;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="title-container">
+            <h1>Daily Success List</h1>
+            <p id="affirmation-subtitle">Start your day strong! 🚀</p>
+        </div>
+        <div class="image-container">
+            <img id="dynamic-image" src="images/step0.png" alt="Motivational Image">
+        </div>
+    </div>
+
+    <div class="checklist-container">
+        <h2>My 10 Essential Tasks</h2>
+        <ul id="task-list">
+            </ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tasks = [
+                "Plan the top 3 priorities for the day 📝",
+                "Spend 1 hour on a focused deep-work task 🧠",
+                "Take a short walk and stretch 🚶",
+                "Hydrate: Finish your first large glass of water 💧",
+                "Clear your inbox of non-essential clutter 🧹",
+                "Practice 5 minutes of mindful breathing 🙏",
+                "Learn one new small thing (word, fact, or skill) 💡",
+                "Prepare a healthy meal or snack 🍎",
+                "Set aside time for a creative outlet 🎨",
+                "Review your progress and plan for tomorrow 🌟"
+            ];
+        
+            const affirmations = [
+                "You're making great progress! Every action has purpose. ✨",
+                "One step down, nine to go! You have the energy. 💪",
+                "Momentum is building! Focus pays off. 🎯",
+                "You are capable of hard things. Keep going! 💖",
+                "Halfway there! Celebrate this milestone. 🎉",
+                "Almost home! Your consistency is inspiring. 💡",
+                "See how far you've come! You are powerful. 🚀",
+                "Just two tasks left! Finish strong. 🏆",
+                "Closing in on success! Excellence is a habit. ✅",
+                "Last one! Effort defines results. Bring it home! 💯",
+                "All 10 tasks complete! You absolutely crushed it today! Rest and recharge. 🥳" // Final affirmation
+            ];
+        
+            // Placeholder image URLs for change (using simple color blocks for demonstration)
+            // Note: These use a free service (via.placeholder) to generate simple, changing images.
+            const imageBaseUrl = "images/";
+            const imageColors = [
+                "step1.png", // Blue
+                "step2.png",   // Medium Sea Green
+                "pastry04.png", 
+                "pastry05.png", 
+                "pastry06.png", 
+                "pastry07.png", 
+                "pastry08.png", 
+                "pastry09.png", 
+                "pastry10.png",    // Blue Violet
+                "step5.png"  // Success Green
+            ];
+        
+            const taskList = document.getElementById('task-list');
+            const affirmationSubtitle = document.getElementById('affirmation-subtitle');
+            const dynamicImage = document.getElementById('dynamic-image');
+        
+            // 1. Initialize the Checklist
+            tasks.forEach((task, index) => {
+                const listItem = document.createElement('li');
+                // We wrap the input and label in the list item
+                listItem.innerHTML = `
+                    <input type="checkbox" id="task-${index}" data-index="${index}">
+                    <label for="task-${index}" class="checkbox-label">${task}</label>
+                `;
+                taskList.appendChild(listItem);
+            });
+        
+            // 2. Add Event Listener to Checkboxes
+            taskList.addEventListener('change', (event) => {
+                if (event.target.type === 'checkbox') {
+                    const listItem = event.target.closest('li');
+                    // Toggle the 'completed' class on the list item
+                    listItem.classList.toggle('completed', event.target.checked);
+                    // Trigger the status update
+                    updateStatus();
+                }
+            });
+        
+            // 3. Function to Update Image and Affirmation
+            function updateStatus() {
+                const checkboxes = Array.from(taskList.querySelectorAll('input[type="checkbox"]'));
+                const completedCount = checkboxes.filter(cb => cb.checked).length;
+        
+                // Update Affirmation
+                // The index directly corresponds to the completed count (0 for start, 1 for 1st task, etc.)
+                affirmationSubtitle.textContent = affirmations[completedCount] || affirmations[0];
+        
+                // Update Image
+                const imagePath = imageColors[completedCount] || imageColors[0];
+                dynamicImage.src = `${imageBaseUrl}${imagePath}`;
+                dynamicImage.alt = `Completion Status: ${completedCount} of 10 tasks complete.`;
+
+                // Add a little visual 'bounce' for the image when it changes
+                dynamicImage.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    dynamicImage.style.transform = 'scale(1.0)';
+                }, 300);
+            }
+        
+            // Initial update to set the starting image and affirmation
+            updateStatus();
+        });
+    </script>
+</body>
+</html>
