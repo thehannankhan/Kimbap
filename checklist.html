@@ -4,56 +4,195 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Affirmation Checklist</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Press+Start+2P&family=Squada+One&family=Tiny5&display=swap"
+        rel="stylesheet">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Pixelify Sans', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f0f2f5;
+            background-image: url(bgs/bg9.GIF);
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
             color: #333;
         }
 
         .header {
+            /* --- STICKY HEADER STYLES --- */
+            position: sticky;
+            top: 0;
+            z-index: 1000; /* Ensures it stays on top of other content */
+            /* Background needed for sticky header to cover content underneath */
+            background-color: #4a7a88; 
+            border-radius: 15px;
+            /* You might want to adjust the max-width and margin for the sticky effect */
+            max-width: 100%;
+            width: 100%;
+            margin-bottom: 30px;
+            /* Keep original layout properties */
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 30px;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
+            align-items: center; /* Changed to center for better sticky alignment */
+            padding: 20px; /* Added internal padding to the sticky bar */
+            box-sizing: border-box; /* Include padding/border in the element's total width/height */
         }
 
+        /* Adjustments for the sticky header content */
         .title-container {
             padding-left: 5px;
+            flex-grow: 1; /* Allows it to take up available space */
         }
 
         .title-container h1 {
-            color: #4CAF50; /* A pleasant green */
+            color: #ffffff; 
             margin: 0;
-            font-size: 2.2em;
+            font-size: 2em;
+        }
+        
+        /* Make the heading font smaller on mobile for a better sticky experience */
+        @media (max-width: 768px) {
+            .title-container h1 {
+                font-size: 1.5em;
+            }
+            body {
+                
+            }
+            .bottom-nav {
+                display: flex;
+                /* Show for mobile */
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                /* UPDATED: Increased height to 70px */
+                height: 70px;
+                /* Set the background color */
+                background-color: #4a7a88;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+                z-index: 1000;
+                justify-content: space-around;
+                align-items: center;
+
+                /* MODIFIED: Changed margin to padding for empty space at the very bottom */
+                padding-bottom: 10px;
+            }
+
+            .nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                color: white;
+                /* Text color */
+                flex-grow: 1;
+                /* Retained flex-grow for side items */
+                height: 100%;
+                font-size: 0.75rem;
+                /* Smaller font for mobile labels */
+                transition: background-color 0.2s;
+                background-color: transparent;
+            }
+
+            .nav-item:hover {
+                background-color: #34495e;
+            }
+
+            .nav-item .icon {
+                font-size: 1.5rem;
+                line-height: 1;
+                /* Keep icon vertically centered */
+            }
+
+            .nav-item .label {
+                margin-top: 3px;
+                font-family: 'Pixelify Sans', sans-serif;
+            }
+
+            /* REVISED CSS for the perfect circle orb icon */
+            .bottom-nav .nav-item:nth-child(2) {
+                /* Selects the second nav-item (the middle one) */
+                position: relative;
+                /* Adjusted top to keep the orb visually centered on the bar (70px high + 10px pad) */
+                top: -20px;
+
+                /* UPDATED: Orb size */
+                width: 80px;
+                height: 80px;
+                border-radius: 15%;
+
+                /* Ensures same color as navbar */
+                background-color: #d9a56b;
+
+                box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
+
+                /* Overrides default nav-item flex properties to ensure fixed size */
+                flex-grow: 0;
+                flex-shrink: 0;
+                flex-basis: auto;
+
+                /* Margin adjustments to visually separate the side items from the orb */
+                margin-left: 15px;
+                margin-right: 15px;
+
+                /* Re-center content in the orb */
+                display: flex;
+                flex-direction: column;
+                /* NEW: Need column layout to stack icon and label */
+                align-items: center;
+                justify-content: center;
+                /* Center content vertically */
+                padding-top: 0;
+            }
+
+            .bottom-nav .nav-item:nth-child(2) .icon {
+                font-size: 2.5rem;
+                line-height: 1;
+            }
+
+            .bottom-nav .nav-item:nth-child(2) .label {
+                /* NEW: Removed absolute positioning for contained text */
+                position: static;
+                width: auto;
+                text-align: center;
+                font-size: 0.65rem;
+                /* Slightly smaller to fit */
+                margin-top: 0;
+                color: white;
+            }
+
+            .bottom-nav .nav-item:nth-child(2):hover {
+                background-color: #34495e;
+            }
         }
 
+
         #affirmation-subtitle {
-            font-style: italic;
-            color: #555;
+            color: lightblue;
             margin: 5px 0 0 0;
-            font-size: 1.1em;
-            transition: color 0.5s; /* Smooth color transition for effect */
+            font-size: 0.9em;
+            transition: color 0.5s;
         }
 
         .image-container #dynamic-image {
-            width: 100px;
-            height: 100px;
+            width: 120px; /* Slightly smaller image for the sticky header */
+            height: 120px;
             object-fit: cover;
-            border-radius: 50%; /* Make the image round */
+            border-radius: 15%; 
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease-out; /* Add a subtle effect on change */
+            background-color: #d9a56b;
+            transition: transform 0.3s ease-out; 
         }
 
         .checklist-container {
-            background: #ffffff;
-            padding: 30px;
+            background: rgba(252, 252, 252, 0.6); /* Increased opacity for readability */
+            padding: 10px;
             border-radius: 12px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
             max-width: 650px;
@@ -65,6 +204,7 @@
             border-bottom: 2px solid #eee;
             padding-bottom: 10px;
             margin-top: 0;
+            text-align: center;
         }
 
         #task-list {
@@ -104,7 +244,7 @@
             display: inline-block;
             width: 18px;
             height: 18px;
-            border: 2px solid #4CAF50;
+            border: 2px solid teal;
             border-radius: 4px;
             margin-right: 15px;
             vertical-align: middle;
@@ -114,8 +254,8 @@
 
         /* Checked state - change custom box color and add a checkmark */
         input[type="checkbox"]:checked + .checkbox-label::before {
-            background-color: #4CAF50;
-            border-color: #4CAF50;
+            background-color: teal;
+            border-color: teal;
             content: '✓';
             color: white;
             text-align: center;
@@ -128,17 +268,25 @@
             color: #a0a0a0;
         }
 
+        .primary-icon {
+            filter: invert(61%) sepia(14%) saturate(1234%) hue-rotate(350deg) brightness(85%) contrast(89%);
+        }
+
+        .secondary-icon {
+            filter: invert(88%) sepia(4%) saturate(6809%) hue-rotate(166deg) brightness(102%) contrast(83%);
+        }
+
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="title-container">
-            <h1>Daily Success List</h1>
+            <h1>Daily<br>Checklist</h1>
             <p id="affirmation-subtitle">Start your day strong! 🚀</p>
         </div>
         <div class="image-container">
-            <img id="dynamic-image" src="images/step0.png" alt="Motivational Image">
+            <img id="dynamic-image" src="images/plant00.png" alt="Motivational Image">
         </div>
     </div>
 
@@ -147,25 +295,41 @@
         <ul id="task-list">
             </ul>
     </div>
+    <br>
+    <br>
 
+    <nav class="bottom-nav">
+        <a href="games.html" class="nav-item">
+            <span class="icon"><img src="games.svg" width="50px" class="secondary-icon"></span>
+            <span class="label"></span>
+        </a>
+        <a href="index.html" class="nav-item">
+            <span class="icon"><img src="home.svg" width="50px" class="primary-icon"></span>
+            <span class="label"></span>
+        </a>
+        <a href="settings.html" class="nav-item">
+            <span class="icon"><img src="settings.svg" width="50px" class="secondary-icon"></span>
+            <span class="label"></span>
+        </a>
+    </nav>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const tasks = [
-                "Plan the top 3 priorities for the day 📝",
-                "Spend 1 hour on a focused deep-work task 🧠",
-                "Take a short walk and stretch 🚶",
-                "Hydrate: Finish your first large glass of water 💧",
-                "Clear your inbox of non-essential clutter 🧹",
-                "Practice 5 minutes of mindful breathing 🙏",
-                "Learn one new small thing (word, fact, or skill) 💡",
-                "Prepare a healthy meal or snack 🍎",
-                "Set aside time for a creative outlet 🎨",
-                "Review your progress and plan for tomorrow 🌟"
+                "Have my oats 🥣",
+                "Brush my teeth 🦷",
+                "Poop time 💩",
+                "Take my medication 💊",
+                "Take a shower 🚿",
+                "Have my lunch 🥙",
+                "Have dinner 🍜",
+                "Skincare routine 🧴",
+                "Brush teeth before bed 🪥",
+                "Take my melatonin 💤"
             ];
         
             const affirmations = [
-                "You're making great progress! Every action has purpose. ✨",
-                "One step down, nine to go! You have the energy. 💪",
+                "You're making great progress! Every action has purpose. ✨", // 0 Tasks complete
+                "One step down, nine to go! You have the energy. 💪",       // 1 Task complete
                 "Momentum is building! Focus pays off. 🎯",
                 "You are capable of hard things. Keep going! 💖",
                 "Halfway there! Celebrate this milestone. 🎉",
@@ -174,25 +338,34 @@
                 "Just two tasks left! Finish strong. 🏆",
                 "Closing in on success! Excellence is a habit. ✅",
                 "Last one! Effort defines results. Bring it home! 💯",
-                "All 10 tasks complete! You absolutely crushed it today! Rest and recharge. 🥳" // Final affirmation
+                "All 10 tasks complete! You absolutely crushed it today! Rest and recharge. 🥳" // 10 Tasks complete (The 11th entry)
             ];
         
-            // Placeholder image URLs for change (using simple color blocks for demonstration)
-            // Note: These use a free service (via.placeholder) to generate simple, changing images.
-            const imageBaseUrl = "images/";
+            // --- IMAGE SETUP INSTRUCTIONS ---
+            // 1. The BASE (Starting) Image:
+            // This image is loaded directly in the HTML: 
+            // <img id="dynamic-image" src="images/step0.png" alt="Motivational Image">
+            // This is the image shown when 0 tasks are complete.
+            
+            // 2. The PROGRESSION Images:
+            // This array holds the filenames for the images shown as tasks are completed.
+            // You need 10 filenames here, corresponding to 1 to 10 tasks completed.
             const imageColors = [
-                "step1.png", // Blue
-                "step2.png",   // Medium Sea Green
-                "pastry04.png", 
-                "pastry05.png", 
-                "pastry06.png", 
-                "pastry07.png", 
-                "pastry08.png", 
-                "pastry09.png", 
-                "pastry10.png",    // Blue Violet
-                "step5.png"  // Success Green
+                "plant01.png", // Image for 1 task complete (Index 0 in array)
+                "plant02.png", // Image for 2 tasks complete (Index 1)
+                "plant03.png", // Image for 3 tasks complete (Index 2)
+                "plant04.png", // Image for 4 tasks complete
+                "plant05.png", // Image for 5 tasks complete
+                "plant06.png", // Image for 6 tasks complete
+                "plant07.png", // Image for 7 tasks complete
+                "plant08.png", // Image for 8 tasks complete
+                "plant09.png", // Image for 9 tasks complete
+                "plant10.png"     // Image for 10 tasks complete (Index 9)
             ];
-        
+            
+            const imageBaseUrl = "images/"; // Folder where your images are stored (relative path)
+            // --------------------------------
+            
             const taskList = document.getElementById('task-list');
             const affirmationSubtitle = document.getElementById('affirmation-subtitle');
             const dynamicImage = document.getElementById('dynamic-image');
@@ -224,13 +397,18 @@
                 const checkboxes = Array.from(taskList.querySelectorAll('input[type="checkbox"]'));
                 const completedCount = checkboxes.filter(cb => cb.checked).length;
         
-                // Update Affirmation
-                // The index directly corresponds to the completed count (0 for start, 1 for 1st task, etc.)
+                // Update Affirmation: Uses completedCount to index the affirmations array (0 to 10)
                 affirmationSubtitle.textContent = affirmations[completedCount] || affirmations[0];
         
-                // Update Image
-                const imagePath = imageColors[completedCount] || imageColors[0];
-                dynamicImage.src = `${imageBaseUrl}${imagePath}`;
+                // Update Image: Use completedCount - 1 to index the imageColors array (0 to 9)
+                if (completedCount > 0) {
+                    const imagePath = imageColors[completedCount - 1];
+                    dynamicImage.src = `${imageBaseUrl}${imagePath}`;
+                } else {
+                    // Reset to the base image when count is 0
+                    dynamicImage.src = "images/plant00.png";
+                }
+
                 dynamicImage.alt = `Completion Status: ${completedCount} of 10 tasks complete.`;
 
                 // Add a little visual 'bounce' for the image when it changes
