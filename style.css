@@ -10,7 +10,7 @@ h1 {
 
 body {
   font-family: Pixelify Sans, Arial, sans-serif;
-  background-color: rgb(133, 180, 115);
+  background-color: #7c954c;
   background-image: url();
   background-repeat: no-repeat;
   text-align: center;
@@ -178,7 +178,7 @@ body {
 @media (max-width: 768px) {
   body {
     font-family: Pixelify Sans, Arial, sans-serif;
-    background-color: rgb(133, 180, 115);
+    background-color: #7c954c;
     background-image: url(bgs/bg1.gif);
     background-size: cover;
     background-repeat: no-repeat;
