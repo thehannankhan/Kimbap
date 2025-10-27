@@ -179,7 +179,7 @@ body {
   body {
     font-family: Pixelify Sans, Arial, sans-serif;
     background-color: rgb(133, 180, 115);
-    background-image: url(bg1.gif);
+    background-image: url(bgs/bg1.gif);
     background-size: cover;
     background-repeat: no-repeat;
     text-align: center;
