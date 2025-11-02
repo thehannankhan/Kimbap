@@ -29,7 +29,7 @@
             background-color: #4a7a88;
             /* --- BG Change Logic Moved to Body --- */
             /* !!! IMPORTANT: Replace 'initial_bg.jpg' with a real image path/URL !!! */
-            background-image: url('initial_bg.jpg'); 
+            background-image: url('bgs/sudokuBG1.png'); 
             background-size: cover;
             background-position: center;
             transition: background-image 1s ease-in-out; /* The fade transition */
@@ -296,7 +296,7 @@
         function generateSolvedBoard() {
             const board = Array.from({ length: 9 }, () => Array(9).fill(0));
             const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-            // Helper functions isValidPlacement and solve omitted for brevity, assume they are here
+            
             function isValidPlacement(b, row, col, num) {
                 for (let i = 0; i < 9; i++) {
                     if (b[row][i] === num || b[i][col] === num) return false;
@@ -350,7 +350,6 @@
         // --- DOM and Game State Management ---
 
         const gridEl = document.getElementById('sudoku-grid');
-        // TARGET THE BODY ELEMENT NOW for background changes
         const bgTargetEl = document.body; 
         const newGameBtn = document.getElementById('new-game-btn');
         const checkBtn = document.getElementById('check-btn');
@@ -359,7 +358,11 @@
         let currentSolvedBoard = [];
         let currentGameBoard = [];
         let completedBoxes = new Set();
+        let currentBgIndex = 0;
         
+        // Key for localStorage
+        const STORAGE_KEY = 'sudokuGame_v1';
+
         // !!! IMPORTANT: Update these URLs to your actual images !!!
         const backgroundImages = [
             'bgs/sudokuBG1.png',   
@@ -373,11 +376,43 @@
             'bgs/sudokuBG9.png',
             'bgs/sudokuBG10.png',     
         ];
-        let currentBgIndex = 0;
+
+        /**
+         * Saves the current game state to localStorage.
+         */
+        function saveGameState() {
+            const state = {
+                solved: currentSolvedBoard,
+                game: currentGameBoard,
+                boxes: Array.from(completedBoxes), // Set to Array for JSON storage
+                bgIndex: currentBgIndex
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        /**
+         * Loads the game state from localStorage.
+         * @returns {boolean} true if state was loaded, false otherwise.
+         */
+        function loadGameState() {
+            const savedState = localStorage.getItem(STORAGE_KEY);
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                currentSolvedBoard = state.solved;
+                currentGameBoard = state.game;
+                completedBoxes = new Set(state.boxes);
+                currentBgIndex = state.bgIndex;
+                
+                // Restore background immediately
+                updateBackgroundImage(true); // Pass true to skip the index check
+                return true;
+            }
+            return false;
+        }
 
 
         /**
-         * Renders the board structure and initial values to the DOM. (Unchanged)
+         * Renders the board structure and initial values to the DOM.
          */
         function renderBoard() {
             gridEl.innerHTML = ''; 
@@ -390,19 +425,33 @@
                 cell.maxLength = '1';
                 cell.dataset.index = index;
                 
-                if (val !== 0) {
-                    cell.value = val;
+                // Get the cell value directly from the board array
+                const r = Math.floor(index / 9);
+                const c = index % 9;
+                const initialValue = currentSolvedBoard[r][c];
+                const isFixed = initialValue !== 0 && currentGameBoard[r][c] === initialValue;
+
+                if (isFixed) {
+                    cell.value = initialValue;
                     cell.classList.add('fixed');
                     cell.readOnly = true;
                 } else {
+                    // Load user input from currentGameBoard
+                    if (currentGameBoard[r][c] !== 0) {
+                        cell.value = currentGameBoard[r][c];
+                    }
                     cell.addEventListener('input', handleCellInput);
                 }
                 gridEl.appendChild(cell);
             });
+            // Show current completion message
+            if (currentBgIndex > 0) {
+                 messageEl.textContent = `Welcome back! Box ${currentBgIndex} complete. ${9 - currentBgIndex} boxes left.`;
+            }
         }
 
         /**
-         * Handles user input in a cell, updating the game state. (Unchanged)
+         * Handles user input in a cell, updating the game state and saving it.
          */
         function handleCellInput(e) {
             const input = e.target;
@@ -423,10 +472,11 @@
             currentGameBoard[r][c] = val === '' ? 0 : num;
             
             checkBoxCompletion(r, c);
+            saveGameState(); // SAVE GAME STATE AFTER EVERY INPUT
         }
 
         /**
-         * Checks if the 3x3 box containing (r, c) is complete and updates the background if so. (Unchanged)
+         * Checks if the 3x3 box containing (r, c) is complete and updates the background if so.
          */
         function checkBoxCompletion(r, c) {
             const boxRow = Math.floor(r / 3);
@@ -455,11 +505,14 @@
         }
 
         /**
-         * Updates the background image on the body with a fade transition. (MODIFIED)
+         * Updates the background image on the body with a fade transition.
+         * @param {boolean} force - Skips the completedBoxes.size check (used for loading saved state).
          */
-        function updateBackgroundImage() {
-            if (completedBoxes.size > currentBgIndex) {
-                currentBgIndex = completedBoxes.size;
+        function updateBackgroundImage(force = false) {
+            if (force || completedBoxes.size > currentBgIndex) {
+                if (!force) {
+                    currentBgIndex = completedBoxes.size;
+                }
                 
                 const imageIndex = Math.min(currentBgIndex, backgroundImages.length - 1);
 
@@ -472,11 +525,11 @@
 
 
         /**
-         * Initiates a new Sudoku game. (MODIFIED)
+         * Initiates a new Sudoku game and saves it.
          */
         function newGame() {
             messageEl.textContent = '';
-            messageEl.style.color = '#333';
+            messageEl.style.color = 'white';
             
             currentSolvedBoard = generateSolvedBoard();
             currentGameBoard = generateGame(currentSolvedBoard, 30);
@@ -488,10 +541,11 @@
             bgTargetEl.style.backgroundImage = `url('${backgroundImages[0]}')`;
             
             renderBoard();
+            saveGameState(); // SAVE FRESH GAME STATE
         }
 
         /**
-         * Compares the current board state with the solved board. (Unchanged)
+         * Compares the current board state with the solved board.
          */
         function checkGame() {
             const userBoard = currentGameBoard.flat().join('');
@@ -499,19 +553,27 @@
             
             if (userBoard === solutionBoard) {
                 messageEl.textContent = '🏆 Congratulations! You solved the Sudoku!';
-                messageEl.style.color = 'green';
+                messageEl.style.color = '#d9a56b'; // Use a distinct color for success
             } else {
                 messageEl.textContent = '❌ The board is not correct. Keep trying!';
                 messageEl.style.color = 'red';
             }
         }
 
-        // --- Event Listeners and Initialization ---
+        // --- Initialization Logic ---
 
         newGameBtn.addEventListener('click', newGame);
         checkBtn.addEventListener('click', checkGame);
 
-        document.addEventListener('DOMContentLoaded', newGame);
+        document.addEventListener('DOMContentLoaded', () => {
+            if (loadGameState()) {
+                // If state was loaded, just render it
+                renderBoard();
+            } else {
+                // Otherwise, start a new game
+                newGame();
+            }
+        });
     </script>
 </body>
 </html>
