@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open World D-Pad Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Base styles for full screen and no scrolling */
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            min-height: 100vh;
+            background-color: #1a1a1a;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* The Game Container (The Viewport) */
+        #game-container {
+            width: 100vw; 
+            height: 100vh; 
+            position: relative; 
+            overflow: hidden;
+            
+            /* Camera/World Setup */
+            background-image: url('bgs/openWorldBG01.png');
+            background-size: 3000px 2000px; 
+            background-repeat: no-repeat;
+            background-position: 0px 0px; 
+            transition: background-position 0.1s linear; /* Smooth scrolling effect */
+        }
+
+        /* The Character (Fixed in the Center of the viewport/camera) */
+        #character {
+            width: 80px; /* INCREASED SIZE */
+            height: 80px; /* INCREASED SIZE */
+            position: absolute; 
+            /* Fixed position: Center of the screen (50% - half of 80px = 40px) */
+            top: calc(50% - 40px); 
+            left: calc(50% - 40px);
+            image-rendering: pixelated; 
+            z-index: 10;
+        }
+
+        /* Speech Bubble Styling */
+        #speech-bubble {
+            position: absolute;
+            /* Adjusted for 80px character: 50% - (40px character half + ~90px margin/bubble height) */
+            top: calc(50% - 130px); 
+            left: calc(50% - 75px); 
+            width: 150px;
+            padding: 8px 12px;
+            background-color: #fff;
+            border: 2px solid #333;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #333;
+            text-align: center;
+            z-index: 15; 
+            box-shadow: 2px 2px 0px #333; 
+            opacity: 1;
+            transition: opacity 0.3s ease-out;
+            pointer-events: none; 
+        }
+
+        #speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px; 
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #fff; 
+            filter: drop-shadow(0 2px 0px #333); 
+        }
+
+        /* Class to hide the bubble */
+        .hidden-bubble {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+
+        /* D-Pad Controls (Overlay) */
+        #controls {
+            position: absolute;
+            bottom: 120px; 
+            left: 20px;
+            z-index: 20;
+            user-select: none; 
+
+            /* D-Pad Grid Layout */
+            display: grid;
+            grid-template-areas:
+                ". up ."
+                "left center right"
+                ". down .";
+            grid-template-columns: repeat(3, 80px); 
+            grid-template-rows: repeat(3, 80px); 
+            gap: 2px;
+        }
+
+        #controls button {
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+            background-color: #4a7a88; 
+            border: 3px solid #19282d;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #19282d;
+            transition: all 0.05s ease;
+        }
+
+        #controls button:active {
+            box-shadow: 0 1px 0 #19282d;
+            transform: translateY(4px);
+            background-color: #5bbdda;
+        }
+
+        /* Assign grid areas */
+        #up-btn { grid-area: up; }
+        #left-btn { grid-area: left; }
+        #right-btn { grid-area: right; }
+        #down-btn { grid-area: down; }
+
+        /* Hidden element to fill the center of the D-Pad */
+        .hidden-center { 
+            grid-area: center; 
+            visibility: hidden; 
+            pointer-events: none;
+        } 
+
+        @media (max-width: 768px) {
+            .bottom-nav {
+                display: flex;
+                /* Show for mobile */
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                /* UPDATED: Increased height to 70px */
+                height: 80px;
+                /* Set the background color */
+                background-color: #4a7a88;
+                box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+                z-index: 1000;
+                justify-content: space-around;
+                align-items: center;
+
+                /* MODIFIED: Changed margin to padding for empty space at the very bottom */
+                padding-bottom: 10px;
+            }
+
+            .nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                color: white;
+                /* Text color */
+                flex-grow: 1;
+                /* Retained flex-grow for side items */
+                height: 100%;
+                font-size: 0.75rem;
+                /* Smaller font for mobile labels */
+                transition: background-color 0.2s;
+                background-color: transparent;
+            }
+
+            .nav-item:hover {
+                background-color: #34495e;
+            }
+
+            .nav-item .icon {
+                font-size: 1.5rem;
+                line-height: 1;
+                /* Keep icon vertically centered */
+            }
+
+            .nav-item .label {
+                margin-top: 3px;
+                font-family: 'Pixelify Sans', sans-serif;
+            }
+
+            /* REVISED CSS for the perfect circle orb icon */
+            .bottom-nav .nav-item:nth-child(2) {
+                /* Selects the second nav-item (the middle one) */
+                position: relative;
+                /* Adjusted top to keep the orb visually centered on the bar (70px high + 10px pad) */
+                top: -20px;
+
+                /* UPDATED: Orb size */
+                width: 80px;
+                height: 80px;
+                border-radius: 15%;
+
+                /* Ensures same color as navbar */
+                background-color: #d9a56b;
+
+                box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
+
+                /* Overrides default nav-item flex properties to ensure fixed size */
+                flex-grow: 0;
+                flex-shrink: 0;
+                flex-basis: auto;
+
+                /* Margin adjustments to visually separate the side items from the orb */
+                margin-left: 15px;
+                margin-right: 15px;
+
+                /* Re-center content in the orb */
+                display: flex;
+                flex-direction: column;
+                /* NEW: Need column layout to stack icon and label */
+                align-items: center;
+                justify-content: center;
+                /* Center content vertically */
+                padding-top: 0;
+            }
+
+            .bottom-nav .nav-item:nth-child(2) .icon {
+                font-size: 2.5rem;
+                line-height: 1;
+            }
+
+            .bottom-nav .nav-item:nth-child(2) .label {
+                /* NEW: Removed absolute positioning for contained text */
+                position: static;
+                width: auto;
+                text-align: center;
+                font-size: 0.65rem;
+                /* Slightly smaller to fit */
+                margin-top: 0;
+                color: white;
+            }
+
+            .bottom-nav .nav-item:nth-child(2):hover {
+                background-color: #34495e;
+            }
+
+        }
+
+        .progress-bar-vertical {
+            height: 80px;
+        }
+
+        .primary-icon {
+            filter: invert(61%) sepia(14%) saturate(1234%) hue-rotate(350deg) brightness(85%) contrast(89%);
+        }
+
+        .secondary-icon {
+            filter: invert(88%) sepia(4%) saturate(6809%) hue-rotate(166deg) brightness(102%) contrast(83%);
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- The character element, fixed in the center of the viewport --><img id="character" src="images/avatarIdleDown.png" alt="Character">
+        
+        <!-- Speech Bubble --><div id="speech-bubble">
+            Hey! This isn't Stardew Valley. I'm in a fantasy forest world though...
+        </div>
+    </div>
+
+    <div id="controls">
+        <!-- The D-Pad buttons --><button id="up-btn">▲</button>
+        <div class="hidden-center"></div> 
+        <button id="left-btn">◀</button>
+        <button id="right-btn">▶</button>
+        <button id="down-btn">▼</button>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="games.html" class="nav-item">
+            <span class="icon"><img src="games.svg" width="50px" class="secondary-icon"></span>
+            <span class="label"></span>
+        </a>
+        <a href="index.html" class="nav-item">
+            <span class="icon"><img src="home.svg" width="50px" class="primary-icon"></span>
+            <span class="label"></span>
+        </a>
+        <a href="settings.html" class="nav-item">
+            <span class="icon"><img src="settings.svg" width="50px" class="secondary-icon"></span>
+            <span class="label"></span>
+        </a>
+    </nav>
+
+    <!-- JavaScript for Game Logic --><script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const character = document.getElementById('character');
+            const container = document.getElementById('game-container');
+            const speechBubble = document.getElementById('speech-bubble');
+            
+            // --- Game World Configuration ---
+            const STEP_SIZE = 30; // Movement speed in pixels
+            const WORLD_WIDTH = 3000; 
+            const WORLD_HEIGHT = 2000; 
+            
+            // Viewport dimensions
+            const CONTAINER_WIDTH = container.offsetWidth;
+            const CONTAINER_HEIGHT = container.offsetHeight;
+            
+            // Character size (80px, must match CSS)
+            const CHAR_SIZE = 80; 
+
+            // Global world position tracking 
+            let worldX = WORLD_WIDTH / 2; 
+            let worldY = WORLD_HEIGHT / 2;
+            
+            let hasMoved = false;
+            let idleTimeout = null; // Manages the walk-to-idle transition
+
+            // --- SPRITE MAPPINGS ---
+            const IDLE_SPRITES = {
+                'up': 'images/avatarIdleUp.png',
+                'down': 'images/avatarIdleDown.png',
+                'left': 'images/avatarIdleLeft.png',
+                'right': 'images/avatarIdleRight.png',
+            };
+
+            const WALK_SPRITES = {
+                'up': 'images/avatarIdleUp.png',
+                'down': 'images/avatarIdleDown.png',
+                'left': 'images/avatarIdleLeft.png',
+                'right': 'images/avatarIdleRight.png',
+            };
+
+            // Sets the idle sprite for the current direction
+            function setIdleSprite(direction) {
+                character.src = IDLE_SPRITES[direction];
+            }
+            
+            /**
+             * Handles initial state setup (called once on load).
+             */
+            function setInitialState(direction) {
+                // Set the initial sprite (Idle Down)
+                setIdleSprite(direction);
+                
+                // Calculate and set initial camera position
+                const offsetX = worldX - (CONTAINER_WIDTH / 2);
+                const offsetY = worldY - (CONTAINER_HEIGHT / 2);
+                container.style.backgroundPosition = `${-offsetX}px ${-offsetY}px`;
+            }
+
+            /**
+             * Handles character movement, position updates, and sprite switching.
+             */
+            function moveCharacter(direction) {
+                // 1. Set the walking sprite immediately
+                character.src = WALK_SPRITES[direction];
+                
+                // Clear any existing timeout to restart the walk duration for continuous movement
+                clearTimeout(idleTimeout);
+
+                let newWorldX = worldX;
+                let newWorldY = worldY;
+
+                // Calculate new world position
+                switch (direction) {
+                    case 'up':
+                        newWorldY -= STEP_SIZE;
+                        break;
+                    case 'down':
+                        newWorldY += STEP_SIZE;
+                        break;
+                    case 'left':
+                        newWorldX -= STEP_SIZE;
+                        break;
+                    case 'right':
+                        newWorldX += STEP_SIZE;
+                        break;
+                }
+                
+                // 2. Boundary Check & Position Update
+                newWorldX = Math.max(CHAR_SIZE / 2, Math.min(newWorldX, WORLD_WIDTH - CHAR_SIZE / 2));
+                newWorldY = Math.max(CHAR_SIZE / 2, Math.min(newWorldY, WORLD_HEIGHT - CHAR_SIZE / 2));
+                
+                const offsetX = newWorldX - (CONTAINER_WIDTH / 2);
+                const offsetY = newWorldY - (CONTAINER_HEIGHT / 2);
+
+                container.style.backgroundPosition = `${-offsetX}px ${-offsetY}px`;
+                worldX = newWorldX;
+                worldY = newWorldY;
+
+                // 3. Set a timeout to revert to the idle sprite
+                idleTimeout = setTimeout(() => {
+                    setIdleSprite(direction);
+                }, 150); // Show the walk frame for 150 milliseconds
+                
+                // 4. Hide speech bubble only after user input
+                if (!hasMoved) {
+                    speechBubble.classList.add('hidden-bubble');
+                    hasMoved = true;
+                }
+            }
+            
+            // Set initial state on load ('down' is the starting direction)
+            setInitialState('down');
+
+            // --- Event Listeners for Buttons ---
+            document.getElementById('up-btn').addEventListener('click', () => moveCharacter('up'));
+            document.getElementById('down-btn').addEventListener('click', () => moveCharacter('down'));
+            document.getElementById('left-btn').addEventListener('click', () => moveCharacter('left'));
+            document.getElementById('right-btn').addEventListener('click', () => moveCharacter('right'));
+            
+            // --- Keyboard Controls (WASD or Arrows) ---
+            document.addEventListener('keydown', (event) => {
+                let direction = null;
+                switch (event.key) {
+                    case 'w':
+                    case 'ArrowUp':
+                        direction = 'up';
+                        break;
+                    case 's':
+                    case 'ArrowDown':
+                        direction = 'down';
+                        break;
+                    case 'a':
+                    case 'ArrowLeft':
+                        direction = 'left';
+                        break;
+                    case 'd':
+                    case 'ArrowRight':
+                        direction = 'right';
+                        break;
+                }
+                if (direction) {
+                    event.preventDefault(); 
+                    moveCharacter(direction);
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
