@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CRITICAL CHANGE: Disables pinch and double-tap zoom on mobile browsers -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Open World D-Pad Explorer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -323,6 +324,7 @@
             let idleTimeout = null; // Manages the walk-to-idle transition
 
             // --- SPRITE MAPPINGS ---
+            // NOTE: Using 'avatarIdleUp.png' as a placeholder for the required walking sprites
             const IDLE_SPRITES = {
                 'up': 'images/avatarIdleUp.png',
                 'down': 'images/avatarIdleDown.png',
@@ -411,10 +413,10 @@
             setInitialState('down');
 
             // --- Event Listeners for Buttons ---
-            document.getElementById('up-btn').addEventListener('click', () => moveCharacter('up'));
-            document.getElementById('down-btn').addEventListener('click', () => moveCharacter('down'));
-            document.getElementById('left-btn').addEventListener('click', () => moveCharacter('left'));
-            document.getElementById('right-btn').addEventListener('click', () => moveCharacter('right'));
+            document.getElementById('up-btn').addEventListener('click', (e) => { e.preventDefault(); moveCharacter('up'); });
+            document.getElementById('down-btn').addEventListener('click', (e) => { e.preventDefault(); moveCharacter('down'); });
+            document.getElementById('left-btn').addEventListener('click', (e) => { e.preventDefault(); moveCharacter('left'); });
+            document.getElementById('right-btn').addEventListener('click', (e) => { e.preventDefault(); moveCharacter('right'); });
             
             // --- Keyboard Controls (WASD or Arrows) ---
             document.addEventListener('keydown', (event) => {
@@ -442,6 +444,16 @@
                     moveCharacter(direction);
                 }
             });
+            
+            // Optional: Prevent double-tap on the entire body using touch events (extra mobile safety)
+            let lastTouchTime = 0;
+            document.body.addEventListener('touchend', function (event) {
+                const now = new Date().getTime();
+                if (now - lastTouchTime <= 300) {
+                    event.preventDefault();
+                }
+                lastTouchTime = now;
+            }, { passive: false });
 
         });
     </script>
