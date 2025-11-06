@@ -47,6 +47,16 @@
             z-index: 10;
         }
 
+        /* NPC Avatar Styling */
+        .npc-avatar {
+            width: 80px;
+            height: 80px;
+            position: absolute; 
+            z-index: 9; /* Slightly lower than player */
+            image-rendering: pixelated; 
+            /* NPCs are positioned by JS, no need for transform transition */
+        }
+
         /* Speech Bubble Styling */
         #speech-bubble {
             position: absolute;
@@ -151,7 +161,7 @@
                 left: 0;
                 width: 100%;
                 /* UPDATED: Increased height to 70px */
-                height: 80px;
+                height: 70px;
                 /* Set the background color */
                 background-color: #4a7a88;
                 box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
@@ -253,10 +263,6 @@
 
         }
 
-        .progress-bar-vertical {
-            height: 80px;
-        }
-
         .primary-icon {
             filter: invert(61%) sepia(14%) saturate(1234%) hue-rotate(350deg) brightness(85%) contrast(89%);
         }
@@ -270,9 +276,16 @@
     <div id="game-container">
         <!-- The character element, fixed in the center of the viewport --><img id="character" src="images/avatarIdleDown.png" alt="Character">
         
-        <!-- Speech Bubble --><div id="speech-bubble">
-            Hey! This isn't Stardew Valley. I'm in a fantasy forest world though...
+        <!-- Speech Bubble (now used for dynamic messages) --><div id="speech-bubble" class="hidden-bubble">
+            Hey! This isn't Stardew Valley. Seems like I'm in a fantasy forest though...
         </div>
+
+        <!-- 5 NPC Avatars (positioned by JS) -->
+        <img id="npc-0" class="npc-avatar" src="images/avatarIdleUp.png" alt="NPC 1">
+        <img id="npc-1" class="npc-avatar" src="images/avatarIdleLeft.png" alt="NPC 2">
+        <img id="npc-2" class="npc-avatar" src="images/avatarIdleRight.png" alt="NPC 3">
+        <img id="npc-3" class="npc-avatar" src="images/avatarIdleDown.png" alt="NPC 4">
+        <img id="npc-4" class="npc-avatar" src="images/avatarIdleUp.png" alt="NPC 5">
     </div>
 
     <div id="controls">
@@ -309,22 +322,58 @@
             const WORLD_WIDTH = 3000; 
             const WORLD_HEIGHT = 2000; 
             
-            // Viewport dimensions
-            const CONTAINER_WIDTH = container.offsetWidth;
-            const CONTAINER_HEIGHT = container.offsetHeight;
-            
             // Character size (80px, must match CSS)
             const CHAR_SIZE = 80; 
+            
+            // Interaction configuration
+            const PROXIMITY_RANGE = 200; // Distance in pixels to trigger speech bubble
+            
+            // Viewport dimensions (initialized here, updated on resize)
+            let CONTAINER_WIDTH = container.offsetWidth;
+            let CONTAINER_HEIGHT = container.offsetHeight;
 
-            // Global world position tracking 
+            // Global world position tracking (center of the world)
             let worldX = WORLD_WIDTH / 2; 
             let worldY = WORLD_HEIGHT / 2;
             
-            let hasMoved = false;
-            let idleTimeout = null; // Manages the walk-to-idle transition
+            let idleTimeout = null; 
+            let hasMoved = false; // Flag for first movement
 
-            // --- SPRITE MAPPINGS ---
-            // NOTE: Using 'avatarIdleUp.png' as a placeholder for the required walking sprites
+            // --- NPC DATA & INITIALIZATION ---
+            const NPC_DIALOGUES = [
+                "Hello traveler! The path ahead is rocky.",
+                "Did you see a blue butterfly? It was huge!",
+                "I'm just watching the grass grow today.",
+                "I hear rumors of an ancient ruin to the East...",
+                "Beware the quicksand near the river!",
+                "Lost my keys again. Oh well."
+            ];
+
+            // Helper to get a random coordinate, ensuring it's not too close to the world edge
+            function getRandomWorldCoordinate(max) {
+                return Math.floor(Math.random() * (max - CHAR_SIZE)) + CHAR_SIZE;
+            }
+
+            // Helper to get 3 random unique dialogues for an NPC
+            function getDialogue() {
+                let dialogues = [];
+                const pool = [...NPC_DIALOGUES];
+                for (let i = 0; i < 3; i++) {
+                    const index = Math.floor(Math.random() * pool.length);
+                    dialogues.push(pool.splice(index, 1)[0]);
+                }
+                return dialogues;
+            }
+
+            const NPC_AVATARS = [
+                { id: 'npc-0', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: getDialogue(), sprite: 'images/avatarIdleUp.png' },
+                { id: 'npc-1', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: getDialogue(), sprite: 'images/avatarIdleLeft.png' },
+                { id: 'npc-2', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: getDialogue(), sprite: 'images/avatarIdleRight.png' },
+                { id: 'npc-3', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: getDialogue(), sprite: 'images/avatarIdleDown.png' },
+                { id: 'npc-4', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: getDialogue(), sprite: 'images/avatarIdleUp.png' },
+            ];
+            
+            // --- SPRITE MAPPINGS (Corrected walk sprites) ---
             const IDLE_SPRITES = {
                 'up': 'images/avatarIdleUp.png',
                 'down': 'images/avatarIdleDown.png',
@@ -333,28 +382,116 @@
             };
 
             const WALK_SPRITES = {
-                'up': 'images/avatarIdleUp.png',
-                'down': 'images/avatarIdleDown.png',
-                'left': 'images/avatarIdleLeft.png',
-                'right': 'images/avatarIdleRight.png',
+                // IMPORTANT: Fixed the bug where the walk sprites were referencing the idle images.
+                'up': 'images/avatarWalkUp.gif',
+                'down': 'images/avatarWalkDown.gif',
+                'left': 'images/avatarWalkLeft.gif',
+                'right': 'images/avatarWalkRight.gif',
             };
 
-            // Sets the idle sprite for the current direction
             function setIdleSprite(direction) {
                 character.src = IDLE_SPRITES[direction];
             }
             
             /**
+             * Updates the visual position of all NPCs based on the camera offset.
+             */
+            function updateNPCPositions(offsetX, offsetY) {
+                NPC_AVATARS.forEach(npc => {
+                    const element = document.getElementById(npc.id);
+                    if (element) {
+                        // NPC position relative to the viewport: World position - Camera offset - half of NPC size
+                        const screenX = npc.x - offsetX - (CHAR_SIZE / 2);
+                        const screenY = npc.y - offsetY - (CHAR_SIZE / 2);
+
+                        element.style.left = `${screenX}px`;
+                        element.style.top = `${screenY}px`;
+                        element.src = npc.sprite; // Ensure they keep their designated idle sprite
+                    }
+                });
+            }
+
+            /**
+             * Handles showing dialogue when near an NPC or hitting the boundary.
+             */
+            function handleInteractions(atBoundaryX, atBoundaryY) {
+                let showBubble = false;
+                let message = "";
+                let proximityDetected = false;
+
+                // A. NPC Proximity Check
+                for (const npc of NPC_AVATARS) {
+                    // Distance between character center and NPC center
+                    const distance = Math.sqrt(
+                        (worldX - npc.x) ** 2 + 
+                        (worldY - npc.y) ** 2
+                    );
+                    
+                    if (distance < PROXIMITY_RANGE) {
+                        // Pick a random dialogue from the NPC's dialogue pool
+                        const index = Math.floor(Math.random() * npc.dialogue.length);
+                        message = `NPC #${npc.id.slice(-1)} says: ${npc.dialogue[index]}`;
+                        showBubble = true;
+                        proximityDetected = true;
+                        break; // Only show one NPC dialogue at a time
+                    }
+                }
+                
+                // B. Boundary Check (only if no NPC is nearby)
+                if (!proximityDetected && (atBoundaryX || atBoundaryY)) {
+                    message = "End of the World! Turn back now, adventurer.";
+                    showBubble = true;
+                }
+
+                // C. Update Speech Bubble UI
+                if (showBubble) {
+                    speechBubble.textContent = message;
+                    speechBubble.classList.remove('hidden-bubble');
+                } else if (hasMoved) { 
+                    // Only hide the bubble if the player is not interacting and has moved once
+                    speechBubble.classList.add('hidden-bubble');
+                }
+            }
+            
+            /**
+             * Updates the game view (background, NPCs) and runs interaction checks.
+             */
+            function updateGameView(x, y) {
+                const minPos = CHAR_SIZE / 2;
+                const maxWorldX = WORLD_WIDTH - minPos;
+                const maxWorldY = WORLD_HEIGHT - minPos;
+                
+                // Determine if the attempted position is hitting a boundary
+                const atBoundaryX = (x <= minPos || x >= maxWorldX);
+                const atBoundaryY = (y <= minPos || y >= maxWorldY);
+
+                // Clamp the world position to stay within boundaries
+                worldX = Math.max(minPos, Math.min(x, maxWorldX));
+                worldY = Math.max(minPos, Math.min(y, maxWorldY));
+                
+                const offsetX = worldX - (CONTAINER_WIDTH / 2);
+                const offsetY = worldY - (CONTAINER_HEIGHT / 2);
+
+                // Move the background (camera)
+                container.style.backgroundPosition = `${-offsetX}px ${-offsetY}px`;
+                
+                // Update NPC positions
+                updateNPCPositions(offsetX, offsetY);
+                
+                // Run interaction checks
+                handleInteractions(atBoundaryX, atBoundaryY);
+            }
+
+            /**
              * Handles initial state setup (called once on load).
              */
             function setInitialState(direction) {
-                // Set the initial sprite (Idle Down)
                 setIdleSprite(direction);
-                
-                // Calculate and set initial camera position
-                const offsetX = worldX - (CONTAINER_WIDTH / 2);
-                const offsetY = worldY - (CONTAINER_HEIGHT / 2);
-                container.style.backgroundPosition = `${-offsetX}px ${-offsetY}px`;
+                // Use the starting position to set up the view and NPCs
+                updateGameView(worldX, worldY);
+                // Set the initial welcome message
+                speechBubble.textContent = "Hey! This isn't Stardew Valley. Where am I?";
+                speechBubble.classList.remove('hidden-bubble');
             }
 
             /**
@@ -364,13 +501,12 @@
                 // 1. Set the walking sprite immediately
                 character.src = WALK_SPRITES[direction];
                 
-                // Clear any existing timeout to restart the walk duration for continuous movement
                 clearTimeout(idleTimeout);
 
                 let newWorldX = worldX;
                 let newWorldY = worldY;
 
-                // Calculate new world position
+                // Calculate potential new world position
                 switch (direction) {
                     case 'up':
                         newWorldY -= STEP_SIZE;
@@ -386,25 +522,16 @@
                         break;
                 }
                 
-                // 2. Boundary Check & Position Update
-                newWorldX = Math.max(CHAR_SIZE / 2, Math.min(newWorldX, WORLD_WIDTH - CHAR_SIZE / 2));
-                newWorldY = Math.max(CHAR_SIZE / 2, Math.min(newWorldY, WORLD_HEIGHT - CHAR_SIZE / 2));
-                
-                const offsetX = newWorldX - (CONTAINER_WIDTH / 2);
-                const offsetY = newWorldY - (CONTAINER_HEIGHT / 2);
-
-                container.style.backgroundPosition = `${-offsetX}px ${-offsetY}px`;
-                worldX = newWorldX;
-                worldY = newWorldY;
+                // Update the entire view and handle clamping/interactions
+                updateGameView(newWorldX, newWorldY);
 
                 // 3. Set a timeout to revert to the idle sprite
                 idleTimeout = setTimeout(() => {
                     setIdleSprite(direction);
-                }, 150); // Show the walk frame for 150 milliseconds
+                }, 350); 
                 
-                // 4. Hide speech bubble only after user input
+                // Set flag after first movement
                 if (!hasMoved) {
-                    speechBubble.classList.add('hidden-bubble');
                     hasMoved = true;
                 }
             }
@@ -412,7 +539,16 @@
             // Set initial state on load ('down' is the starting direction)
             setInitialState('down');
 
+            // --- Resize Listener (keeps the character centered when the viewport changes) ---
+            window.addEventListener('resize', () => {
+                CONTAINER_WIDTH = container.offsetWidth;
+                CONTAINER_HEIGHT = container.offsetHeight;
+                // Recalculate view based on new container size
+                updateGameView(worldX, worldY);
+            });
+
             // --- Event Listeners for Buttons ---
+            // e.preventDefault() added to prevent potential mobile issues with buttons
             document.getElementById('up-btn').addEventListener('click', (e) => { e.preventDefault(); moveCharacter('up'); });
             document.getElementById('down-btn').addEventListener('click', (e) => { e.preventDefault(); moveCharacter('down'); });
             document.getElementById('left-btn').addEventListener('click', (e) => { e.preventDefault(); moveCharacter('left'); });
