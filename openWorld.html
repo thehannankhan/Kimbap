@@ -103,7 +103,8 @@
             z-index: 25; 
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
             transition: opacity 0.3s ease, transform 0.3s ease;
-            opacity: 0;
+            /* FIX 1: Set base opacity to 1 so the .hidden-boundary class controls visibility */
+            opacity: 1; 
             pointer-events: none;
         }
 
@@ -309,13 +310,13 @@
 
         <!-- 5 NPC Avatars (positioned by JS) --><img id="npc-0" class="npc-avatar" src="images/NPC01.png" alt="NPC 1">
         <img id="npc-1" class="npc-avatar" src="images/NPC02.png" alt="NPC 2">
-        <img id="npc-2" class="npc-avatar" src="images/avatarIdleRight.png" alt="NPC 3">
-        <img id="npc-3" class="npc-avatar" src="images/avatarIdleDown.png" alt="NPC 4">
-        <img id="npc-4" class="npc-avatar" src="images/avatarIdleUp.png" alt="NPC 5">
+        <img id="npc-2" class="npc-avatar" src="images/NPC03.png" alt="NPC 3">
+        <img id="npc-3" class="npc-avatar" src="images/NPC04.png" alt="NPC 4">
+        <img id="npc-4" class="npc-avatar" src="images/NPC05.gif" alt="NPC 5">
     </div>
 
     <!-- Boundary Warning Bubble (Fixed to viewport edge) --><div id="boundary-warning" class="hidden-boundary">
-        End of the World!
+        End of the World! Turn back traveller.
     </div>
 
     <div id="controls">
@@ -357,7 +358,8 @@
             
             // Character size (80px, must match CSS)
             const CHAR_SIZE = 80; 
-            const BUBBLE_OFFSET_Y = 30; // How far above the character's top edge the bubble appears
+            // FIX 2: Increased offset to ensure bubble is clearly above the NPC
+            const BUBBLE_OFFSET_Y = 40; 
 
             // Interaction configuration
             const PROXIMITY_RANGE = 200; 
@@ -379,9 +381,9 @@
             const FIXED_NPC_DIALOGUES = [
                 "(Aunty McChina): Longtime! Come in for some nice duck pancakes",
                 "(Berryhill Cat): Meow meow meow meow.",
-                "(Merchant): I lost my gold coin somewhere near a big rock. Can you find it?",
-                "(Sage): Follow the sunset for the fastest route home.",
-                "(Child): The creator made my speech bubble fixed so you can customize it!",
+                "(Kebab Man): Sorry, kebab shop is closed",
+                "(Police): Let's register your police report",
+                "(Crackhead): I would sure love some crack.",
             ];
 
             // Helper to get a random coordinate, ensuring it's not too close to the world edge
@@ -394,9 +396,9 @@
             const NPC_AVATARS = [
                 { id: 'npc-0', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[0], sprite: 'images/NPC01.png' },
                 { id: 'npc-1', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[1], sprite: 'images/NPC02.png' },
-                { id: 'npc-2', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[2], sprite: 'images/avatarIdleRight.png' },
-                { id: 'npc-3', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[3], sprite: 'images/avatarIdleDown.png' },
-                { id: 'npc-4', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[4], sprite: 'images/avatarIdleUp.png' },
+                { id: 'npc-2', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[2], sprite: 'images/NPC03.png' },
+                { id: 'npc-3', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[3], sprite: 'images/NPC04.png' },
+                { id: 'npc-4', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[4], sprite: 'images/NPC05.gif' },
             ];
             
             // --- SPRITE MAPPINGS (Walk sprites updated to GIF) ---
@@ -458,7 +460,8 @@
              * @param {string} direction 'top', 'bottom', 'left', 'right'
              */
             function showBoundaryWarning(direction) {
-                boundaryWarning.textContent = `WARNING! End of the map to the ${direction.toUpperCase()}.`;
+                // Reverted to the simple text content
+                boundaryWarning.textContent = 'End of the World! Turn back traveller.';
                 
                 // Clear all positioning classes
                 boundaryWarning.className = '';
@@ -490,11 +493,9 @@
                         const { screenX, screenY } = getNPCScreenPosition(npc, offsetX, offsetY);
                         
                         // Position bubble over the NPC's head, adjusting for bubble height
-                        // The bubble has a defined width, and transform: translateX(-50%) centers it.
-                        // We need to move it up by its own approximate height + some padding.
-                        // Let's assume an average bubble height of ~40px (padding + font-size) + 10px padding
+                        // screenX + (CHAR_SIZE / 2) targets the horizontal center of the 80px sprite.
                         interactionBubble.style.left = `${screenX + (CHAR_SIZE / 2)}px`;
-                        // screenY is the top of the 80px sprite. We want to be above that.
+                        // screenY - BUBBLE_OFFSET_Y targets the position above the sprite.
                         interactionBubble.style.top = `${screenY - BUBBLE_OFFSET_Y}px`; 
                         
                         interactionBubble.textContent = npc.dialogue; 
@@ -594,7 +595,7 @@
                 // Set a timeout to revert to the idle sprite
                 idleTimeout = setTimeout(() => {
                     setIdleSprite(direction);
-                }, 150); 
+                }, 350); 
                 
                 if (!hasMoved) {
                     hasMoved = true;
