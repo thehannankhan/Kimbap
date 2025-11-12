@@ -317,6 +317,9 @@
             Welcome to the open world! Use the D-Pad to explore.
         </div>
 
+        <!-- NEW: Fixed NPC in the top-left corner of the world (uses NPC03 sprite) -->
+        <img id="npc-fixed" class="npc-avatar" src="images/NPC03.png" alt="Fixed NPC">
+
         <!-- 5 NPC Avatars (positioned by JS) --><img id="npc-0" class="npc-avatar" src="images/NPC01.png" alt="NPC 1">
         <img id="npc-1" class="npc-avatar" src="images/NPC02.png" alt="NPC 2">
         <img id="npc-2" class="npc-avatar" src="images/NPC03.png" alt="NPC 3">
@@ -385,16 +388,21 @@
             
             let idleTimeout = null; 
             let hasMoved = false; 
+            
+            // NEW: Variable to hold the continuous movement interval ID
+            let movementInterval = null; 
 
             // --- NPC DATA & INITIALIZATION ---
             
-            // Fixed dialogues for customization (UPDATED)
+            // Fixed dialogues for customization (UPDATED to include the new NPC dialogue)
             const FIXED_NPC_DIALOGUES = [
                 "(Aunty McChina): Longtime! Come in for some nice duck pancakes",
                 "(Berryhill Cat): Meow meow meow meow.",
                 "(Kebab Man): Sorry, kebab shop is closed",
                 "(Police): Let's register your police report",
                 "(Crackhead): I would sure love some crack.",
+                // NEW Dialogue for the fixed NPC
+                "(Gatekeeper NPC): Welcome to the starting corner of the world. It's dangerous to go alone!" 
             ];
 
             // Helper to get a random coordinate, ensuring it's not too close to the world edge
@@ -405,6 +413,10 @@
 
             // NPC Avatars, now using fixed dialogues and UPDATED SPRITES
             const NPC_AVATARS = [
+                // NEW FIXED NPC (Top-left corner of the world at world coordinate 100, 100)
+                { id: 'npc-fixed', x: 100, y: 100, dialogue: FIXED_NPC_DIALOGUES[5], sprite: 'images/NPC03.png' }, 
+                
+                // Existing random NPCs
                 { id: 'npc-0', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[0], sprite: 'images/NPC01.png' },
                 { id: 'npc-1', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[1], sprite: 'images/NPC02.png' },
                 { id: 'npc-2', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[2], sprite: 'images/NPC03.png' },
@@ -667,6 +679,36 @@
                 }
             }
             
+            /**
+             * Starts the continuous movement in a given direction when button is pressed.
+             * @param {string} direction 'up', 'down', 'left', or 'right'
+             */
+            function startMovement(direction) {
+                // Clear any existing interval to prevent speeding up
+                if (movementInterval) {
+                    clearInterval(movementInterval);
+                }
+                
+                // 1. Move immediately on press (for quick taps/single step)
+                moveCharacter(direction);
+                
+                // 2. Set interval for continuous movement (100ms for smooth walking)
+                movementInterval = setInterval(() => {
+                    moveCharacter(direction);
+                }, 100); 
+            }
+
+            /**
+             * Stops the continuous movement when button is released.
+             */
+            function stopMovement() {
+                if (movementInterval) {
+                    clearInterval(movementInterval);
+                    movementInterval = null;
+                }
+                // The moveCharacter function already handles setting the idle sprite via timeout.
+            }
+            
             // Set initial state on load ('down' is the starting direction)
             setInitialState('down');
 
@@ -677,13 +719,35 @@
                 updateGameView(worldX, worldY);
             });
 
-            // --- Event Listeners for Buttons ---
-            document.getElementById('up-btn').addEventListener('click', (e) => { e.preventDefault(); moveCharacter('up'); });
-            document.getElementById('down-btn').addEventListener('click', (e) => { e.preventDefault(); moveCharacter('down'); });
-            document.getElementById('left-btn').addEventListener('click', (e) => { e.preventDefault(); moveCharacter('left'); });
-            document.getElementById('right-btn').addEventListener('click', (e) => { e.preventDefault(); moveCharacter('right'); });
+            // --- Event Listeners for Buttons (Continuous Movement) ---
+            function setupButtonListeners(id, direction) {
+                const button = document.getElementById(id);
+
+                // Start movement on press (mouse or touch)
+                button.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    startMovement(direction);
+                });
+                button.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    startMovement(direction);
+                }, { passive: false });
+
+                // Stop movement on release (mouse or touch)
+                button.addEventListener('mouseup', stopMovement);
+                button.addEventListener('touchend', stopMovement);
+                
+                // Stop movement if the mouse cursor leaves the button while held down
+                button.addEventListener('mouseleave', stopMovement);
+            }
+
+            setupButtonListeners('up-btn', 'up');
+            setupButtonListeners('down-btn', 'down');
+            setupButtonListeners('left-btn', 'left');
+            setupButtonListeners('right-btn', 'right');
             
             // --- Keyboard Controls (WASD or Arrows) ---
+            // Note: Keyboard controls only move one step per keypress unless held by the OS repeat
             document.addEventListener('keydown', (event) => {
                 let direction = null;
                 switch (event.key) {
