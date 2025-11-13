@@ -317,10 +317,13 @@
             Welcome to the open world! Use the D-Pad to explore.
         </div>
 
-        <!-- NEW: Fixed NPC in the top-left corner of the world (uses NPC03 sprite) -->
+        <!-- FIXED NPC 1 (The one that talks) -->
         <img id="npc-fixed" class="npc-avatar" src="images/NPC03.png" alt="Fixed NPC">
+        
+        <!-- NEW FIXED NPC 2 (The silent companion) -->
+        <img id="npc-fixed-companion" class="npc-avatar" src="images/NPC06.png" alt="Fixed NPC Companion">
 
-        <!-- 5 NPC Avatars (positioned by JS) --><img id="npc-0" class="npc-avatar" src="images/NPC01.png" alt="NPC 1">
+        <!-- 5 Random NPC Avatars (positioned by JS) --><img id="npc-0" class="npc-avatar" src="images/NPC01.png" alt="NPC 1">
         <img id="npc-1" class="npc-avatar" src="images/NPC02.png" alt="NPC 2">
         <img id="npc-2" class="npc-avatar" src="images/NPC03.png" alt="NPC 3">
         <img id="npc-3" class="npc-avatar" src="images/NPC04.png" alt="NPC 4">
@@ -402,7 +405,7 @@
                 "(Police): Let's register your police report",
                 "(Crackhead): I would sure love some crack.",
                 // NEW Dialogue for the fixed NPC
-                "(Gatekeeper NPC): Welcome to the starting corner of the world. It's dangerous to go alone!" 
+                "Great Massaman, even better tea!" 
             ];
 
             // Helper to get a random coordinate, ensuring it's not too close to the world edge
@@ -413,9 +416,12 @@
 
             // NPC Avatars, now using fixed dialogues and UPDATED SPRITES
             const NPC_AVATARS = [
-                // NEW FIXED NPC (Top-left corner of the world at world coordinate 100, 100)
-                { id: 'npc-fixed', x: 100, y: 100, dialogue: FIXED_NPC_DIALOGUES[5], sprite: 'images/NPC03.png' }, 
+                // Fixed NPC 1 (Gatekeeper) - The one that talks (World: 250, 350)
+                { id: 'npc-fixed', x: 250, y: 350, dialogue: FIXED_NPC_DIALOGUES[5], sprite: 'images/NPC03.png' }, 
                 
+                // NEW Fixed NPC 2 (Companion) - 50px left of the first (World: 200, 350). Dialogue is null.
+                { id: 'npc-fixed-companion', x: 200, y: 350, dialogue: null, sprite: 'images/NPC04.png' },
+
                 // Existing random NPCs
                 { id: 'npc-0', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[0], sprite: 'images/NPC01.png' },
                 { id: 'npc-1', x: getRandomWorldCoordinate(WORLD_WIDTH), y: getRandomWorldCoordinate(WORLD_HEIGHT), dialogue: FIXED_NPC_DIALOGUES[1], sprite: 'images/NPC02.png' },
@@ -552,6 +558,9 @@
 
                 // 1. Check NPC Proximity (A. NPC Check)
                 for (const npc of NPC_AVATARS) {
+                    // NEW: Only check proximity for NPCs that actually have dialogue
+                    if (!npc.dialogue) continue; 
+                    
                     const distance = Math.sqrt(
                         (worldX - npc.x) ** 2 + 
                         (worldY - npc.y) ** 2
