@@ -321,7 +321,7 @@
         <img id="npc-fixed" class="npc-avatar" src="images/NPC03.png" alt="Fixed NPC">
         
         <!-- NEW FIXED NPC 2 (The silent companion) -->
-        <img id="npc-fixed-companion" class="npc-avatar" src="images/NPC06.png" alt="Fixed NPC Companion">
+        <img id="npc-fixed-companion" class="npc-avatar" src="images/NPC04.png" alt="Fixed NPC Companion">
 
         <!-- 5 Random NPC Avatars (positioned by JS) --><img id="npc-0" class="npc-avatar" src="images/NPC01.png" alt="NPC 1">
         <img id="npc-1" class="npc-avatar" src="images/NPC02.png" alt="NPC 2">
@@ -376,6 +376,8 @@
             
             // Character size (80px, must match CSS)
             const CHAR_SIZE = 80; 
+            // NEW: Reduced size for character collision box (30x30 centered)
+            const CHAR_HITBOX_SIZE = 30; 
             const BUBBLE_OFFSET_Y = 40; 
 
             // Interaction configuration
@@ -435,11 +437,11 @@
                 // Structure 0: Top Left (Large Structure)
                 { id: 'structure-0', x: 250, y: 300, width: 180, height: 180, src: 'images/structure01.png' },
                 // Structure 1: Bottom Left 1 (Small house)
-                { id: 'structure-1', x: 1900, y: 1700, width: 300, height: 300, src: 'images/structure02.png' },
+                { id: 'structure-1', x: 2825, y: 1725, width: 250, height: 300, src: 'images/structure02.png' },
                 // Structure 2: Bottom Left 2 (Shop/Market)
-                { id: 'structure-2', x: 1800, y: 1400, width: 300, height: 300, src: 'images/structure02.png' },
+                { id: 'structure-2', x: 2700, y: 1350, width: 250, height: 300, src: 'images/structure02.png' },
                 // Structure 3: Bottom Left 3 (Tower - Tall)
-                { id: 'structure-3', x: 1700, y: 1700, width: 300, height: 300, src: 'images/structure02.png' },
+                { id: 'structure-3', x: 2500, y: 1725, width: 250, height: 300, src: 'images/structure02.png' },
             ];
             
             // --- SPRITE MAPPINGS (Walk sprites updated to GIF) ---
@@ -456,7 +458,42 @@
                 'left': 'images/avatarWalkLeft.gif',
                 'right': 'images/avatarWalkRight.gif',
             };
+            
+            // --- COLLISION LOGIC ---
 
+            /**
+             * Creates an AABB (Axis-Aligned Bounding Box) for an entity centered at (x, y).
+             * @param {number} x World center X coordinate.
+             * @param {number} y World center Y coordinate.
+             * @param {number} width Entity width.
+             * @param {number} height Entity height.
+             * @returns {{left: number, right: number, top: number, bottom: number}}
+             */
+            function getBoundingBox(x, y, width, height) {
+                const halfWidth = width / 2;
+                const halfHeight = height / 2;
+                return {
+                    left: x - halfWidth,
+                    right: x + halfWidth,
+                    top: y - halfHeight,
+                    bottom: y + halfHeight
+                };
+            }
+
+            /**
+             * Performs AABB collision check between two rectangles.
+             * @param {Object} rect1 Bounding box 1.
+             * @param {Object} rect2 Bounding box 2.
+             */
+            function checkCollision(rect1, rect2) {
+                return (
+                    rect1.left < rect2.right &&
+                    rect1.right > rect2.left &&
+                    rect1.top < rect2.bottom &&
+                    rect1.bottom > rect2.top
+                );
+            }
+            
             function setIdleSprite(direction) {
                 character.src = IDLE_SPRITES[direction];
             }
@@ -632,7 +669,7 @@
                 
                 // Update element positions
                 updateNPCPositions(offsetX, offsetY);
-                updateStructurePositions(offsetX, offsetY); // NEW CALL
+                updateStructurePositions(offsetX, offsetY); 
                 
                 // Run interaction checks
                 handleInteractions(atBoundaryX, atBoundaryY, offsetX, offsetY);
@@ -657,6 +694,7 @@
 
             /**
              * Handles character movement, position updates, and sprite switching.
+             * Collision logic is implemented here.
              */
             function moveCharacter(direction) {
                 character.src = WALK_SPRITES[direction];
@@ -665,7 +703,7 @@
                 let newWorldX = worldX;
                 let newWorldY = worldY;
 
-                // Calculate potential new world position
+                // 1. Calculate potential new world position
                 switch (direction) {
                     case 'up': newWorldY -= STEP_SIZE; break;
                     case 'down': newWorldY += STEP_SIZE; break;
@@ -673,8 +711,42 @@
                     case 'right': newWorldX += STEP_SIZE; break;
                 }
                 
-                // Update the entire view and handle clamping/interactions
-                updateGameView(newWorldX, newWorldY);
+                // 2. Check for collisions at the potential new position
+                // MODIFIED: Use the smaller CHAR_HITBOX_SIZE for a more "pixel-like" collision area.
+                const potentialCharRect = getBoundingBox(newWorldX, newWorldY, CHAR_HITBOX_SIZE, CHAR_HITBOX_SIZE);
+                let collisionDetected = false;
+
+                // Check NPC collisions
+                for (const npc of NPC_AVATARS) {
+                    // NPC Bounding box remains full size (80x80)
+                    const npcRect = getBoundingBox(npc.x, npc.y, CHAR_SIZE, CHAR_SIZE);
+                    if (checkCollision(potentialCharRect, npcRect)) {
+                        collisionDetected = true;
+                        break;
+                    }
+                }
+                
+                // Check Structure collisions (only if no NPC collision was found)
+                if (!collisionDetected) {
+                    for (const structure of STRUCTURES) {
+                        // Structure Bounding box remains full size
+                        const structureRect = getBoundingBox(structure.x, structure.y, structure.width, structure.height);
+                        if (checkCollision(potentialCharRect, structureRect)) {
+                            collisionDetected = true;
+                            break;
+                        }
+                    }
+                }
+
+                // 3. Update position only if no collision occurred
+                if (!collisionDetected) {
+                    // Update the entire view and handle clamping/interactions
+                    updateGameView(newWorldX, newWorldY);
+                } else {
+                    // If collision happened, prevent the move but still update the view 
+                    // with the current position to handle interactions and boundary checks
+                    updateGameView(worldX, worldY); 
+                }
 
                 // Set a timeout to revert to the idle sprite
                 idleTimeout = setTimeout(() => {
@@ -749,12 +821,12 @@
                 // Stop movement if the mouse cursor leaves the button while held down
                 button.addEventListener('mouseleave', stopMovement);
             }
-
+            
             setupButtonListeners('up-btn', 'up');
             setupButtonListeners('down-btn', 'down');
             setupButtonListeners('left-btn', 'left');
             setupButtonListeners('right-btn', 'right');
-            
+
             // --- Keyboard Controls (WASD or Arrows) ---
             // Note: Keyboard controls only move one step per keypress unless held by the OS repeat
             document.addEventListener('keydown', (event) => {
